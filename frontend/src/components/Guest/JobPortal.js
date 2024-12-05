@@ -28,7 +28,7 @@ const degreeBranchMap = {
     "Sculpture", "Painting", "Ceramics", "Digital Arts"
   ],
   "Bachelor of Engineering (BEng)": [
-    "Civil Engineering", "Mechanical Engineering", "Electrical Engineering",
+    "Civil Engineering", "Mechanical Engineering", "Computer Science Engineering", "Electrical Engineering",
     "Electronics Engineering", "Chemical Engineering", "Aerospace Engineering",
     "Industrial Engineering", "Biomedical Engineering", "Agricultural Engineering"
   ],
@@ -72,6 +72,7 @@ const degreeBranchMap = {
   "Other": ["N/A"]
 };
 
+
 const experienceOptions = [
   'Less than 6 months',
   '6 months to 1 year',
@@ -104,8 +105,24 @@ const initialValues = {
 
 
 const validationSchema = Yup.object({
-  degree: Yup.string().required('Degree is required'),
-  branch: Yup.string().required('Branch is required'),
+  degree: Yup.string()
+  .required('Degree is required')
+  .min(5, 'Degree must be at least 5 characters')
+  .max(50, 'Degree must be less than 50 characters')
+  .test('degree-not-empty', 'Please select or enter a degree', (value) => {
+    return !!value && !(value === 'Other' && !value.trim());
+  }),
+
+
+  branch: Yup.string()
+  .required('Branch is required')
+  .min(5, 'Branch must be at least 5 characters')
+  .max(50, 'Branch must be less than 50 characters'),
+
+  mobileNumber: Yup.string()
+  .required('Mobile Number is required')
+  .matches(/^[6-9][0-9]{9}$/, 'Must be a valid 10-digit number'),
+    
   yearOfPassedOut: Yup.number()
     .required('Year of Passed Out is required')
     .min(new Date().getFullYear() - 18, `Year must not be earlier than ${new Date().getFullYear() - 18}`)
@@ -114,18 +131,9 @@ const validationSchema = Yup.object({
 
   dateOfBirth: Yup.date()
     .required('Date of Birth is required')
-    .max(new Date(new Date().setFullYear(new Date().getFullYear() - 18)), 'You must be at least 18 years old'),
+    .max(new Date(new Date().setFullYear(new Date().getFullYear() - 18)), 'You must be at least 18 years old')
+    .min(new Date('1980-01-01'), 'Date of Birth must not be earlier than January 1, 1980'),
 
-  // dateOfBirth: Yup.date()
-  //   .max(new Date(), "Date cannot be in the future")
-  //   .required("Date of Birth is required")
-  //   .test("is-valid-year", "Year must be four digits", (value) => {
-  //     if (value) {
-  //       const year = new Date(value).getFullYear();
-  //       return year >= 1900 && year <= 2100; // Adjust these limits as needed
-  //     }
-  //     return true; // Skip validation if no value
-  //   }),
 
   experience: Yup.string().required('Experience is required'),
   location: Yup.string().required('Location is required'),
@@ -162,6 +170,9 @@ const JobPortal = ({ setSelectedView }) => {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [loading, setLoading] = useState(false);
 
+
+  const [customDegree, setCustomDegree] = useState('');
+  const [customBranch, setCustomBranch] = useState('');
 
 
 
@@ -205,6 +216,7 @@ const JobPortal = ({ setSelectedView }) => {
       const jobYear = jobDate.getFullYear().toString();
       const jobMonth = String(jobDate.getMonth() + 1).padStart(2, '0');
 
+      
       const yearMatch = selectedYear ? jobYear === selectedYear : true;
       const monthMatch = selectedMonth ? jobMonth === selectedMonth : true;
       const jobRoleMatch = selectedJobRole ? job.jobTitle === selectedJobRole : true;
@@ -294,7 +306,6 @@ const JobPortal = ({ setSelectedView }) => {
       });
     }
   };
-
   return (
     <div>
       <Container className="px-0 ml-auto mr-auto mb-5" style={{ overflow: "auto" }}>
@@ -302,25 +313,6 @@ const JobPortal = ({ setSelectedView }) => {
           <div className="container mt-5">
             <h2 className="mb-4" style={{ color: "white" }}>Job Application Form</h2>
             <Formik
-              // initialValues={{
-              //   ...initialValues,
-              //   jobId: selectedJob.jobId,
-              //   companyName: selectedJob.companyName,
-              //   jobRole: selectedJob.jobTitle,
-              //   candidateId: candidateID,
-              //   fullName: internData.fullName || '',
-              //   email: internData.email || '',
-              //   mobileNumber: internData.mobileNo || '',
-              //   yearOfPassedOut: internData.yearOfPassedOut || '',
-              //   gender: internData.gender || '',
-              //   dateOfBirth: internData.dateOfBirth ? formatDate(internData.dateOfBirth) : '',
-              //   experience: internData.experience || '',
-              //   location: selectedJob.Location || '',
-              //   technology: internData.domain || '',
-              //   megaDrive: internData.megaDrive || '',
-              //   branch: internData.degree || '',
-              //   degree: internData.branch || '',
-              // }}
 
               initialValues={{
                 ...initialValues,
@@ -343,14 +335,18 @@ const JobPortal = ({ setSelectedView }) => {
                 branch: internData.branch || '',
               }}
 
+
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
+
               {({ handleSubmit, setFieldValue }) => (
+
                 <Form onSubmit={(e) => {
                   e.preventDefault();
                   handleSubmit(e);
                 }}>
+
                   <Field name="jobRole">
                     {({ field }) => (
                       <Form.Group className="mb-3">
@@ -424,14 +420,27 @@ const JobPortal = ({ setSelectedView }) => {
                   <ErrorMessage name="email" component="div" className="text-danger" />
 
                   <Field name="mobileNumber">
-                    {({ field }) => (
-                      <Form.Group className="mb-3">
-                        <Form.Label style={{ color: "white" }}>Mobile Number *</Form.Label>
-                        <Form.Control {...field} type="tel" />
-                      </Form.Group>
-                    )}
-                  </Field>
-                  <ErrorMessage name="mobileNumber" component="div" className="text-danger" />
+  {({ field }) => (
+    <Form.Group className="mb-3">
+      <Form.Label style={{ color: "white" }}>Mobile Number *</Form.Label>
+      <Form.Control
+        {...field}
+        type="tel"
+        pattern="\d{10}"
+        maxLength="10"
+        placeholder="Enter 10-digit mobile number"
+        onKeyPress={(e) => {
+          // Allow only digits (0-9)
+          if (!/[0-9]/.test(e.key)) {
+            e.preventDefault();
+          }
+        }}
+      />
+    </Form.Group>
+  )}
+</Field>
+<ErrorMessage name="mobileNumber" component="div" className="text-danger" />
+
 
                   <Field name="technology">
                     {({ field }) => (
@@ -444,61 +453,99 @@ const JobPortal = ({ setSelectedView }) => {
                   <ErrorMessage name="technology" component="div" className="text-danger" />
 
 
-                  {/* <Field name="qualification">
-                    {({ field }) => (
-                      <Form.Group className="mb-3">
-                        <Form.Label>Qualification *</Form.Label>
-                        <Form.Select {...field}>
-                          <option value="">Select qualification</option>
-                          {qualifications.map((qual, index) => (
-                            <option key={index} value={qual}>{qual}</option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
-                    )}
-                  </Field>
-                  <ErrorMessage name="qualification" component="div" className="text-danger" /> */}
+<Field name="degree">
+  {({ field, form }) => (
+    <Form.Group className="mb-3">
+      <Form.Label style={{ color: 'white' }}>Degree *</Form.Label>
+      <Form.Select
+        {...field}
+        onChange={(e) => {
+          const selectedDegree = e.target.value;
+          setFieldValue('degree', selectedDegree);
+          setFieldValue('branch', ''); // Reset branch when degree changes
+          setSelectedDegree(selectedDegree);
+          setAvailableBranches(degreeBranchMap[selectedDegree] || []);
+        }}
+      >
+        <option value="">Select degree</option>
+        {Object.keys(degreeBranchMap).map((degree, index) => (
+          <option key={index} value={degree}>
+            {degree}
+          </option>
+        ))}
+      </Form.Select>
 
+      {/* Conditionally render input field when "Other" is selected */}
+      {selectedDegree === 'Other' && (
+        <Form.Control
+          type="text"
+          placeholder="Enter your degree"
+          className="mt-3"
+          required
+          value={customDegree}
+          onKeyPress={(e) => {
+            if (!/[a-z A-Z /S]/.test(e.key)) {
+              e.preventDefault();
+            }
+          }}
+          onChange={(e) => {
+            const value = e.target.value;
 
-                  <Field name="degree">
-                    {({ field }) => (
-                      <Form.Group className="mb-3">
-                        <Form.Label style={{ color: "white" }}>Degree *</Form.Label>
-                        <Form.Select
-                          {...field}
-                          onChange={(e) => {
-                            const selectedDegree = e.target.value;
-                            setFieldValue('degree', selectedDegree);
-                            setFieldValue('branch', ''); // Reset branch when degree changes
-                            setSelectedDegree(selectedDegree);
-                            setAvailableBranches(degreeBranchMap[selectedDegree] || []);
-                          }}
-                        >
-                          <option value="">Select degree</option>
-                          {Object.keys(degreeBranchMap).map((degree, index) => (
-                            <option key={index} value={degree}>{degree}</option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
-                    )}
-                  </Field>
-                  <ErrorMessage name="degree" component="div" className="text-danger" />
+            if (/^[a-zA-Z\s]*$/.test(value)) {
+              setFieldValue('degree', value);
+              setCustomDegree(value);
+            }
+          }}
+        />
+      )}
+    </Form.Group>
+  )}
+</Field>
+<ErrorMessage name="degree" component="div" className="text-danger" />
 
-                  {/* Branch Selection - Updated */}
-                  <Field name="branch">
-                    {({ field }) => (
-                      <Form.Group className="mb-3">
-                        <Form.Label style={{ color: "white" }}>Branch *</Form.Label>
-                        <Form.Select {...field}>
-                          <option value="">Select branch</option>
-                          {availableBranches.map((branch, index) => (
-                            <option key={index} value={branch}>{branch}</option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
-                    )}
-                  </Field>
-                  <ErrorMessage name="branch" component="div" className="text-danger" />
+<Field name="branch">
+{({ field, form }) => (
+  <Form.Group className="mb-3">
+    <Form.Label style={{ color: "white" }}>Branch *</Form.Label>
+    {selectedDegree === "Other" ? (
+      <Form.Control
+        type="text"
+        placeholder="Enter your branch"
+        value={customBranch}
+        required
+        onKeyPress={(e) => {
+          if (!/[a-zA-Z\s]/.test(e.key)) {
+            e.preventDefault();
+          }
+        }}
+        onChange={(e) => {
+          const value = e.target.value;
+          setCustomBranch(value); // Update customBranch state
+          form.setFieldValue('branch', value); // Sync Formik's field value
+          form.setFieldTouched('branch', true); // Mark field as touched for validation
+        }}
+      />
+    ) : (
+      <Form.Select
+        {...field}
+        onChange={(e) => {
+          const selectedBranch = e.target.value;
+          form.setFieldValue('branch', selectedBranch);
+          form.setFieldTouched('branch', true); // Mark field as touched for validation
+        }}
+      >
+        <option value="">Select branch</option>
+        {availableBranches.map((branch, index) => (
+          <option key={index} value={branch}>
+            {branch}
+          </option>
+        ))}
+      </Form.Select>
+    )}
+  </Form.Group>
+)}
+</Field>
+<ErrorMessage name="branch" component="div" className="text-danger" />
 
 
 
@@ -527,14 +574,6 @@ const JobPortal = ({ setSelectedView }) => {
                   </Field>
                   <ErrorMessage name="gender" component="div" className="text-danger" />
 
-                  {/* <Field name="dateOfBirth">
-                    {({ field }) => (
-                      <Form.Group className="mb-3">
-                        <Form.Label>Date of Birth *</Form.Label>
-                        <Form.Control {...field} type="date" />
-                      </Form.Group>
-                    )}
-                  </Field> */}
                   <Field name="dateOfBirth">
                     {({ field }) => (
                       <Form.Group className="mb-3">
@@ -549,12 +588,10 @@ const JobPortal = ({ setSelectedView }) => {
                           }}
                           onKeyDown={handleYearInput} // Attach the keydown handler
                         />
-                        <div style={{ color: 'red' }}>
-                          <ErrorMessage name="dateOfBirth" />
-                        </div>
                       </Form.Group>
                     )}
                   </Field>
+                  <ErrorMessage name="dateOfBirth" component="div" className="text-danger" />
 
                   <Field name="experience">
                     {({ field }) => (
@@ -585,6 +622,7 @@ const JobPortal = ({ setSelectedView }) => {
                     )}
                   </Field>
                   <ErrorMessage name="megaDrive" component="div" className="text-danger" />
+
                   <Form.Group className="mb-3">
                     <Form.Label style={{ color: "white" }}>Resume *</Form.Label>
                     <Field name="resume">
@@ -592,6 +630,7 @@ const JobPortal = ({ setSelectedView }) => {
                         <div>
                           <input
                             type="file"
+
                             onChange={(event) => {
                               const file = event.currentTarget.files[0];
                               console.log("Selected file:", file);
@@ -616,45 +655,10 @@ const JobPortal = ({ setSelectedView }) => {
 
                   </Form.Group>
 
-                  {/* <Button
-                    type="submit"
-                    style={{
-                      backgroundColor: '#007bff', // Primary color
-                      borderColor: '#007bff', // Primary border color
-                      color: '#fff', // Text color
-                      padding: '10px 20px', // Padding
-                      fontSize: '16px', // Font size
-                      borderRadius: '5px', // Rounded corners
-                      border: 'none', // Remove border
-                      cursor: 'pointer', // Pointer cursor on hover
-                    }}
-                  >
-                    Apply
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={handleBackToJobs}
-                    style={{
-                      backgroundColor: '#6c757d', // Secondary color
-                      borderColor: '#6c757d', // Secondary border color
-                      color: '#fff', // Text color
-                      padding: '10px 20px', // Padding
-                      fontSize: '16px', // Font size
-                      borderRadius: '5px', // Rounded corners
-                      border: 'none', // Remove border
-                      cursor: 'pointer', // Pointer cursor on hover
-                      margin: '10px', // Margin
-                    }}
-                  >
-                    Back
-                  </Button> */}
-
                   <Button type="submit" style={{ background: "#1e1f21", border: "none" }}>
                     {loading ? "Applying..." : "Apply"}
                   </Button>
-                  <Button type="button" variant="secondary" onClick={handleBackToJobs} style={{margin:"10px", background:"#1e1f21", border:"none"}}>
+                  <Button type="button" onClick={handleBackToJobs} style={{ margin: "10px", background: "#1e1f21", border: "none" }}>
                     Back
                   </Button>
                 </Form>
@@ -665,7 +669,7 @@ const JobPortal = ({ setSelectedView }) => {
           <>
             <Container className="my-3">
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                <h1 style={{ color: '#888888', fontWeight: 'bold', fontSize: '25px' }}>Available Jobs</h1>
+                <h1 style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '25px' }}>Available Jobs</h1>
               </div>
             </Container>
 
@@ -678,7 +682,8 @@ const JobPortal = ({ setSelectedView }) => {
                         style={{
                           borderRadius: '10px',
                           border: '1px solid #ddd',
-                          background: "#1e1f21",                          height: '350px',
+                          background: "#1e1f21",
+                          height: '350px',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
@@ -698,7 +703,7 @@ const JobPortal = ({ setSelectedView }) => {
                           </h5>
                           <p
                             style={{
-                              color: '#6c757d',
+                              color: '#ffffff',
                               marginBottom: '15px',
                             }}
                           >
@@ -721,7 +726,7 @@ const JobPortal = ({ setSelectedView }) => {
                           cursor: "pointer",
                           textAlign: "right",
                           textDecoration: 'none',
-                          color: '#53289e',
+                          color: '#ffffff',
                           fontWeight: '500',
                           marginRight: "30px",
                           marginTop: '20px',
@@ -739,6 +744,7 @@ const JobPortal = ({ setSelectedView }) => {
                 )}
               </Row>
             </Container>
+
             {filteredJobs.length > jobsPerPage && (
               <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                 <Pagination
@@ -753,11 +759,11 @@ const JobPortal = ({ setSelectedView }) => {
         )}
       </Container>
 
-      <Modal show={showModal} onHide={handleCloseModal}>
+      <Modal show={showModal} onHide={handleCloseModal} >
         <Modal.Header closeButton>
           <Modal.Title>Job Details</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body >
           {selectedJob ? (
             <>
               <p><strong></strong> {selectedJob.jobTitle}</p>
@@ -766,6 +772,8 @@ const JobPortal = ({ setSelectedView }) => {
               <p><strong>Description:</strong> {selectedJob.jobDescription}</p>
               <p><strong>Experience :</strong> {selectedJob.jobExperience}</p>
               <p><strong>Qualification :</strong> {selectedJob.jobQualification}</p>
+              {selectedJob.bond && 
+              <p><strong>Bond :</strong> {selectedJob.bond}</p> }
               <p><strong>Skills Required:</strong> {selectedJob.requiredSkills}</p>
               <p><strong>Location:</strong> {selectedJob.Location}</p>
               <p><strong>Salary:</strong> {selectedJob.salary}</p>
@@ -787,6 +795,7 @@ const JobPortal = ({ setSelectedView }) => {
           )}
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 };

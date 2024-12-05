@@ -132,7 +132,6 @@ const GuestRegistrationRequests = () => {
                 <th style={{backgroundColor:'#1b74a8',color:'white'}}>Program</th>
                 <th style={{backgroundColor:'#1b74a8',color:'white'}}>Domain</th>
                 <th style={{backgroundColor:'#1b74a8',color:'white'}}>Batch No</th>
-                <th style={{backgroundColor:'#1b74a8',color:'white'}}>Mode of Training</th>
                 <th style={{backgroundColor:'#1b74a8',color:'white'}}>Mega Drive Status</th>
                 <th style={{backgroundColor:'#1b74a8',color:'white'}}>Actions</th>
               </tr>
@@ -153,9 +152,8 @@ const GuestRegistrationRequests = () => {
                   <td>{candidate.program}</td>
                   <td>{candidate.domain}</td>
                   <td>{candidate.batchno}</td>
-                  <td>{candidate.modeOfTraining}</td>
                   <td>{candidate.megadriveStatus}</td>
-                  <td>
+		  <td>
                     <Button 
                        style={{background:'transparent',border:'none',color:'green'}} 
                       onClick={() => handleAccept([candidate])}

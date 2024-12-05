@@ -269,6 +269,7 @@ const JobStatus = ({ statusInfo }) => {
               <option value="profiles-sent">Profiles Sent</option>
               <option value="drive-scheduled">Drive Scheduled</option>
               <option value="drive-done">Drive Done</option>
+              <option value="offer-received">Offer Received</option>
               <option value="not-interested">Not Interested</option>
             </select>
           </Col>}
@@ -333,3 +334,4 @@ const JobStatus = ({ statusInfo }) => {
 };
 
 export default JobStatus;
+

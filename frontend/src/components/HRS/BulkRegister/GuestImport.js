@@ -80,3 +80,4 @@ const BulkUpload = ({ onBulkUpload }) => {
 };
 
 export default BulkUpload;
+

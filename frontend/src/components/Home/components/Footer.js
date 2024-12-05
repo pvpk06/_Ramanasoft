@@ -67,7 +67,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <div className='row'>
-                    <div className='col pb-5'>
+                    <div className='footer-rights-text col pb-5'>
                         ©2024 RamanaSoft. All rights reserved.
                     </div>
                 </div>

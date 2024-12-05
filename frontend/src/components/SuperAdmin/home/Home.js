@@ -31,8 +31,8 @@ const HrPortal = () => {
     { title: 'JD received', value: 0, link: '/sa_dash/jd-received', color: '#e8c93f', element: FaCheck },
     { title: 'Profiles Sent', value: 0, link: '/sa_dash/profiles-sent', color: '#21bf40', element: FaUserTie },
     { title: 'Drive Scheduled', value: 0, link: '/sa_dash/drive-scheduled', color: '#f73643', element: FaTimes },
-
-    { title: 'Drive Done/Offer received', value: 0, link: '/sa_dash/drive-done', color: '#9acd32', element: FaCheck },
+    { title: 'Drive Done', value: 0, link: '/sa_dash/drive-done', color: '#9acd32', element: FaCheck },
+    { title: 'Offer received', value: 0, link: '/sa_dash/offer-received', color: '#9acd32', element: FaCheck },
     { title: 'Not interested HRs', value: 0, link: '/sa_dash/not-interested', color: '#708090', element: FaUserTie }
 
   ]);
@@ -137,6 +137,7 @@ const HrPortal = () => {
         const profilesSentResponse = await apiService.get(`/api/job-statistics/profiles-sent`);
         const driveScheduledResponse = await apiService.get(`/api/job-statistics/drive-scheduled`);
         const driveDoneResponse = await apiService.get(`/api/job-statistics/drive-done`);
+        const OfferReveivedResponse = await apiService.get(`/api/job-statistics/offer-received`);
         const notInterestedResponse = await apiService.get(`/api/job-statistics/not-interested`);
 
         console.log("HrLeadsResponse :", HrLeadsResponse);
@@ -161,8 +162,10 @@ const HrPortal = () => {
                 return { ...stat, value: profilesSentResponse.data.count };
               case 'Drive Scheduled':
                 return { ...stat, value: driveScheduledResponse.data.count };
-              case 'Drive Done/Offer received':
+              case 'Drive Done':
                 return { ...stat, value: driveDoneResponse.data.count };
+                case 'Offer received':
+                  return { ...stat, value: OfferReveivedResponse.data.count };    
               case 'Not interested HRs':
                 return { ...stat, value: notInterestedResponse.data.count };
               default:

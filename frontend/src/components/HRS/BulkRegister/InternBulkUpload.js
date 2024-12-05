@@ -157,3 +157,4 @@ const InternBulkRegister = () => {
 };
 
 export default InternBulkRegister;
+

@@ -49,7 +49,7 @@ const InternRegistration = ({ setSelectedView }) => {
         /^[A-Za-z]+ [A-Za-z]+$/,
         'Full Name must consist of a first name and a last name, separated by a space, and should contain only letters'
       ),
-      email: Yup.string()
+    email: Yup.string()
       .matches(emailRegex, 'Invalid email format')
       .required('Email is required *'),
 
@@ -401,8 +401,8 @@ const InternRegistration = ({ setSelectedView }) => {
       >
         {({ isSubmitting }) => (
           <Form className="w-100 intern_reg_section" autoComplete="off">
-            <div style={{ display: "flex", gap: "10px" }}>
-              <h2 className="intern_reg_section_title">
+            <div style={{ display: "flex", gap: "10px", color: "white" }}>
+              <h2 className="intern_reg_section_title" >
                 Intern Registration Form
               </h2>
               <i style={{ fontSize: "17px" }}> <FaFileSignature /> </i>
@@ -416,7 +416,30 @@ const InternRegistration = ({ setSelectedView }) => {
                 name="fullName"
                 fullWidth
                 required
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                InputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
               />
+
               <ErrorMessage name="fullName" component="div" className="error-message" />
             </div>
             <div className="intern_reg_form_group">
@@ -429,6 +452,28 @@ const InternRegistration = ({ setSelectedView }) => {
                 name="email"
                 fullWidth
                 required
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                InputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
               />
               <ErrorMessage name="email" component="div" className="error-message" />
             </div>
@@ -442,6 +487,10 @@ const InternRegistration = ({ setSelectedView }) => {
                 fullWidth
                 required
                 inputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
                   maxLength: 10,
                   inputMode: 'numeric', // Ensures numeric keyboard on mobile devices
                   pattern: '[0-9]*' // Ensures only numbers are allowed
@@ -453,6 +502,22 @@ const InternRegistration = ({ setSelectedView }) => {
                     </InputAdornment>
                   ),
                 }}
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
                 onKeyPress={(e) => {
                   // Allow only digits (0-9)
                   if (!/[0-9]/.test(e.key)) {
@@ -462,6 +527,7 @@ const InternRegistration = ({ setSelectedView }) => {
               />
               <ErrorMessage name="mobileno" component="div" className="error-message" />
             </div>
+
             <div className="intern_reg_form_group">
               <Field
                 as={TextField}
@@ -471,19 +537,42 @@ const InternRegistration = ({ setSelectedView }) => {
                 name="altmobileno"
                 fullWidth
                 required
-                inputProps={{ maxLength: 10 }}
+                InputLabelProps={{
+                  style: { color: '#ffffff' }
+                }}
                 InputProps={{
+                  maxLength: 10,
+                  style: {
+                    color: '#ffffff',
+                    borderColor: '#ffffff'
+                  },
+                  
                   startAdornment: (
                     <InputAdornment position="start">
                       <span className="bg-secondary-subtle rounded p-2">+91</span>
                     </InputAdornment>
-                  ),
+                  )
                 }}
                 onKeyPress={(e) => {
+                  // Allow only digits (0-9)
                   if (!/[0-9]/.test(e.key)) {
                     e.preventDefault();
                   }
                 }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
+                inputProps={{ maxLength: 10 }}
               />
               <ErrorMessage name="altmobileno" component="div" className="error-message" />
             </div>
@@ -496,18 +585,67 @@ const InternRegistration = ({ setSelectedView }) => {
                 name="address"
                 fullWidth
                 required
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                InputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
               />
               <ErrorMessage name="address" component="div" className="error-message" />
             </div>
             <div className="intern_reg_form_group">
-              <FormControl fullWidth>
-                <InputLabel required>Domain</InputLabel>
+
+              <FormControl fullWidth required variant="outlined">
+                <InputLabel style={{ color: '#ffffff' }}>Domain</InputLabel>
                 <Field
                   as={Select}
-                  label="Domain"
                   name="domain"
+                  label="Domain"
                   fullWidth
                   required
+                  sx={{
+                    color: '#ffffff', // Text color
+                    '.MuiInputBase-input': {
+                      color: '#ffffff', // Select text color
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                    '.MuiSvgIcon-root': {
+                      color: '#ffffff', // Dropdown arrow color
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#333333', // Dropdown menu background
+                        color: '#ffffff', // Dropdown menu text color
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="Python Full Stack">Full Stack Python</MenuItem>
                   <MenuItem value="Java Full Stack">Full Stack Java</MenuItem>
@@ -517,10 +655,10 @@ const InternRegistration = ({ setSelectedView }) => {
                   <MenuItem value="Businesses Analyst">Businesses Analyst</MenuItem>
                   <MenuItem value="Data Science">Data Science</MenuItem>
                   <MenuItem value="Cyber Security">Cyber Security</MenuItem>
-
                 </Field>
                 <ErrorMessage name="domain" component="div" className="error-message" />
               </FormControl>
+
             </div>
             <div className="intern_reg_form_group">
               <Field
@@ -532,6 +670,28 @@ const InternRegistration = ({ setSelectedView }) => {
                 fullWidth
                 required
 
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                InputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
                 inputProps={{
                   inputMode: 'numeric',
                   pattern: '[0-9]*'
@@ -540,7 +700,7 @@ const InternRegistration = ({ setSelectedView }) => {
               <ErrorMessage name="batchno" component="div" className="error-message" />
             </div>
             <div className="intern_reg_form_group">
-              <FormControl fullWidth>
+              {/* <FormControl fullWidth>
                 <InputLabel required>Mode of Internship</InputLabel>
                 <Field
                   as={Select}
@@ -548,14 +708,59 @@ const InternRegistration = ({ setSelectedView }) => {
                   name="modeOfInternship"
                   fullWidth
                   required
+
+                >
+                  <MenuItem value="Online">Online</MenuItem>
+                  <MenuItem value="Offline">Offline</MenuItem>
+                </Field>
+                <ErrorMessage name="modeOfInternship" component="div" className="error-message" />
+              </FormControl> */}
+              <FormControl fullWidth required>
+                <InputLabel
+                  style={{ color: '#ffffff' }} // Label color
+                >
+                  Mode of Internship
+                </InputLabel>
+                <Field
+                  as={Select}
+                  name="modeOfInternship"
+                  label="Mode of Internship"
+                  fullWidth
+                  sx={{
+                    color: '#ffffff', // Text color
+                    '.MuiInputBase-input': {
+                      color: '#ffffff', // Select text color
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                    '.MuiSvgIcon-root': {
+                      color: '#ffffff', // Dropdown arrow color
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#333333', // Dropdown menu background
+                        color: '#ffffff', // Dropdown menu text color
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="Online">Online</MenuItem>
                   <MenuItem value="Offline">Offline</MenuItem>
                 </Field>
                 <ErrorMessage name="modeOfInternship" component="div" className="error-message" />
               </FormControl>
+
             </div>
-            <div className="intern_reg_form_group">
+            {/* <div className="intern_reg_form_group">
               <FormControl component="fieldset">
                 <FormLabel component="legend" required>Belonged to Vasavi Foundation</FormLabel>
                 <Field
@@ -579,7 +784,59 @@ const InternRegistration = ({ setSelectedView }) => {
               className="intern_reg_submit_button"
             >
               {isSubmitting ? 'Submitting...' : 'Register'}
-            </Button>
+            </Button> */}
+            <div className="intern_reg_form_group">
+              <FormControl component="fieldset">
+                <FormLabel
+                  component="legend"
+                  required
+                  style={{ color: '#ffffff' }} // Label color
+                >
+                  Belonged to Vasavi Foundation
+                </FormLabel>
+                <Field
+                  as={RadioGroup}
+                  name="belongedToVasaviFoundation"
+                  row
+                  required
+                >
+                  <FormControlLabel
+                    value="Yes"
+                    control={<Radio sx={{ color: '#ffffff', '&.Mui-checked': { color: '#ffffff' } }} />}
+                    label="Yes"
+                    sx={{ color: '#ffffff' }} // Label color
+                  />
+                  <FormControlLabel
+                    value="No"
+                    control={<Radio sx={{ color: '#ffffff', '&.Mui-checked': { color: '#ffffff' } }} />}
+                    label="No"
+                    sx={{ color: '#ffffff' }} // Label color
+                  />
+                </Field>
+                <ErrorMessage name="belongedToVasaviFoundation" component="div" className="error-message" />
+              </FormControl>
+            </div>
+
+            {/* <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', marginRight:"8%" }}> */}
+            <div>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={isSubmitting}
+                className="intern_reg_submit_button"
+                sx={{
+                  backgroundColor: '#333333',
+                  color: '#ffffff',
+                  '&:hover': {
+                    backgroundColor: '#555555',
+                  },
+                }}
+              >
+                {isSubmitting ? 'Submitting...' : 'Register'}
+              </Button>
+            </div>
+
           </Form>
         )}
       </Formik>
@@ -605,3 +862,4 @@ const InternRegistration = ({ setSelectedView }) => {
 };
 
 export default InternRegistration;
+

@@ -110,7 +110,7 @@ const StudentDetails = ({ candidateID }) => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
+                              <tr>
                   <td>{studentData.candidateID || studentData.guestID}</td>
                   <td>{studentData.fullName}</td>
                   <td>{studentData.email}</td>
@@ -118,7 +118,7 @@ const StudentDetails = ({ candidateID }) => {
                   <td>{studentData.domain}</td>
                   <td>{studentData.batchNo || studentData.batchno}</td>
                 </tr>
-              </tbody>
+		</tbody>
             </Table>
           </Col>
         ) : (

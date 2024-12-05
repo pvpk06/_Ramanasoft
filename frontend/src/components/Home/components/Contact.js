@@ -3,6 +3,7 @@ import emailjs from '@emailjs/browser';
 import contact1 from '../images/contact1.jpg'
 import './styling.css';
 import { toast } from 'react-toastify';
+import { height } from '@mui/system';
 
 const Contact = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -72,9 +73,9 @@ const Contact = () => {
         <div className="container">
           <h2 style={{color:"white", marginBottom:"50px"}}>Our Branches </h2>
           <div className="row mb-5 ">
-            <div className="col-md-5 px-5 py-4" style={{color:"white"}}>
-              <h4>RamanaSoft Consulting Services</h4>
-              <p>
+            <div className="col-md-5 py-4" style={{color:"white"}}>
+              <div className='contact-page-heading'>RamanaSoft Consulting Services</div>
+              <p >
                 Aditya Trade Center<br />
                 404, fourth floor, <br />
                 Ameerpet, Hyderabad<br />
@@ -101,7 +102,7 @@ const Contact = () => {
       </section>
 
       <section className='contact-form container'>
-        <div className='mb-4 mt-3 d-flex align-items-center row' style={{padding:"100px 0"}}>
+        <div className='mb-4 mt-3 d-flex align-items-center row'>
           <div className='form shadow rounded col-6'>
             <h2 className='text-center fw-bold' style={{color:"white"}}>Contact Us <i className="fa-solid fa-comment"></i></h2>
             <form ref={form} onSubmit={sendEmail} >
@@ -149,8 +150,8 @@ const Contact = () => {
               </div>
             </form>
           </div>
-          <div className='col-6'>
-            <img src={contact1} alt='' height="400px" width="500px" />
+          <div className='col-6' style={{width:"50%"}}>
+            <img className=' contact-call-image' height="400px" width="500px" src={contact1} alt=''/>
           </div>
         </div>
       </section>

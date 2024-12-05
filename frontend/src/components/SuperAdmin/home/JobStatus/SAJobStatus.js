@@ -72,11 +72,11 @@ const JobStatus = ({ statusInfo }) => {
 
   const memoColumns = useMemo(() => [
     { Header: 'Company Name', accessor: 'companyName' },
+    { Header: 'Job ID', accessor: 'jobId' },
     { Header: 'Job Title', accessor: 'jobTitle' },
     { Header: 'Hr Email', accessor: 'email' },
-    { Header: 'Job Experience', accessor: 'jobExperience' },
-    { Header: 'Job Type', accessor: 'jobType' },
-    {
+    
+	{
       Header: 'Status',
       accessor: 'status',
       Cell: ({ row, value }) => (

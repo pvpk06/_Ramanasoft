@@ -1,0 +1,23 @@
+.achivements_cards_cont {
+    width: 100%;
+    height: 250px;
+    background-color: #3e4146;
+    border-radius: 5px;
+    color: #fff;
+    opacity: 0.5;
+    text-align: center;
+}
+.offer_letter_open {
+    opacity: 1;
+    cursor: pointer;
+}
+.offer_letter_icon_cont {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.lock_icon {
+    font-size: 60px !important;
+}

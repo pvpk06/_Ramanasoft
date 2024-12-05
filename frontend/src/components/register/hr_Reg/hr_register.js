@@ -17,10 +17,10 @@ const HRRegistration = ({ setSelectedView }) => {
         /^[A-Za-z]+ [A-Za-z]+$/,
         'Full Name must consist of a first name and a last name, separated by a space, and should contain only letters'
       ),
-      email: Yup.string()
+    email: Yup.string()
       .matches(emailRegex, 'Invalid email format')
       .required('Email is required *'),
-        contactNo: Yup.string()
+    contactNo: Yup.string()
       .matches(/^[6-9][0-9]{9}$/, 'Mobile number must start with 6,7,8,9 and contain exactly 10 digits')
       .required('Contact No is required *'),
     dob: Yup.date().required('Date of Birth is required *'),
@@ -71,7 +71,7 @@ const HRRegistration = ({ setSelectedView }) => {
   };
 
   return (
-    <div className="intern_reg_container">
+    <div className="intern_reg_container" style={{ color: "white" }}>
       <h4 className="intern_reg_subtitle">HR Registration Form</h4>
       <Formik
         initialValues={{
@@ -104,6 +104,28 @@ const HRRegistration = ({ setSelectedView }) => {
                   name="fullName"
                   error={touched.fullName && !!errors.fullName}
                   helperText={touched.fullName && errors.fullName}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
                 />
               </div>
               <div className="intern_reg_form_group">
@@ -115,6 +137,28 @@ const HRRegistration = ({ setSelectedView }) => {
                   name="email"
                   error={touched.email && !!errors.email}
                   helperText={touched.email && errors.email}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
                 />
               </div>
               <div className="intern_reg_form_group">
@@ -124,10 +168,15 @@ const HRRegistration = ({ setSelectedView }) => {
                   variant="outlined"
                   className="intern_reg_input"
                   name="contactNo"
+                  required
                   inputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
                     maxLength: 10,
-                    inputMode: 'numeric',
-                    pattern: '[0-9]*'
+                    inputMode: 'numeric', // Ensures numeric keyboard on mobile devices
+                    pattern: '[0-9]*' // Ensures only numbers are allowed
                   }}
                   InputProps={{
                     startAdornment: (
@@ -135,8 +184,24 @@ const HRRegistration = ({ setSelectedView }) => {
                         <span className="bg-secondary-subtle rounded p-2">+91</span>
                       </InputAdornment>
                     ),
-                    className: 'fw-bold'
                   }}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
+
                   error={touched.contactNo && !!errors.contactNo}
                   helperText={touched.contactNo && errors.contactNo}
                   onKeyPress={(e) => {
@@ -147,6 +212,45 @@ const HRRegistration = ({ setSelectedView }) => {
                   }}
                 />
               </div>
+
+              {/* <div className="intern_reg_form_group">
+                <Field
+                  as={TextField}
+                  label="Date of Birth"
+                  variant="outlined"
+                  type="date"
+                  className="intern_reg_input"
+                  name="dob"
+                  error={touched.dob && !!errors.dob}
+                  helperText={touched.dob && errors.dob}
+                  InputLabelProps={{
+                    shrink: true,
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                  }}
+
+                  
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
+                />
+              </div> */}
+
               <div className="intern_reg_form_group">
                 <Field
                   as={TextField}
@@ -155,11 +259,48 @@ const HRRegistration = ({ setSelectedView }) => {
                   type="date"
                   className="intern_reg_input"
                   name="dob"
-                  InputLabelProps={{ shrink: true }}
                   error={touched.dob && !!errors.dob}
                   helperText={touched.dob && errors.dob}
+                  InputLabelProps={{
+                    shrink: true,
+                    style: { color: '#ffffff' }, // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff', // Text color
+                      borderColor: '#ffffff', // Border color
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                    '& input[type="date"]': {
+                      color: '#ffffff', // Input text color
+                      backgroundColor: 'transparent', // Ensuring no background color that might override
+                      paddingRight: '30px', // Making sure we leave space for the icon (optional)
+                    },
+                    // Webkit browsers (Chrome, Safari)
+                    '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                      filter: 'invert(1)', // Make the calendar icon white
+                    },
+                    // Firefox
+                    '& input[type="date"]::-moz-calendar-picker-indicator': {
+                      filter: 'invert(1)', // Make the calendar icon white
+                    },
+                  }}
                 />
               </div>
+
+
               <div className="intern_reg_form_group">
                 <Field
                   as={TextField}
@@ -169,16 +310,65 @@ const HRRegistration = ({ setSelectedView }) => {
                   name="address"
                   error={touched.address && !!errors.address}
                   helperText={touched.address && errors.address}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
+
                 />
               </div>
               <div className="intern_reg_form_group">
                 <FormControl variant="outlined" className="intern_reg_input" error={touched.gender && !!errors.gender}>
-                  <InputLabel className=" text-secondary">Gender</InputLabel>
+                  <InputLabel style={{ color: '#ffffff' }} >Gender</InputLabel>
                   <Field
                     as={Select}
                     name="gender"
                     label="Gender"
                     labelId="gender-label"
+                    sx={{
+                      color: '#ffffff', // Text color
+                      '.MuiInputBase-input': {
+                        color: '#ffffff', // Select text color
+                      },
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                      '.MuiSvgIcon-root': {
+                        color: '#ffffff', // Dropdown arrow color
+                      },
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backgroundColor: '#333333', // Dropdown menu background
+                          color: '#ffffff', // Dropdown menu text color
+                        },
+                      },
+                    }}
                   >
                     <MenuItem value="Male">Male</MenuItem>
                     <MenuItem value="Female">Female</MenuItem>
@@ -196,6 +386,28 @@ const HRRegistration = ({ setSelectedView }) => {
                   name="branch"
                   error={touched.branch && !!errors.branch}
                   helperText={touched.branch && errors.branch}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
                 />
               </div>
             </div>
@@ -210,6 +422,28 @@ const HRRegistration = ({ setSelectedView }) => {
                   name="workEmail"
                   error={touched.workEmail && !!errors.workEmail}
                   helperText={touched.workEmail && errors.workEmail}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
                 />
               </div>
               <div className="intern_reg_form_group">
@@ -219,8 +453,12 @@ const HRRegistration = ({ setSelectedView }) => {
                   variant="outlined"
                   className="intern_reg_input"
                   name="workMobile"
-                  inputProps={{ 
-                    maxLength: 10, 
+                  inputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                    maxLength: 10,
                     inputMode: 'numeric', // Ensures numeric keyboard on mobile devices
                     pattern: '[0-9]*' // Ensures only numbers are allowed
                   }}
@@ -230,15 +468,31 @@ const HRRegistration = ({ setSelectedView }) => {
                         <span className="bg-secondary-subtle rounded p-2">+91</span>
                       </InputAdornment>
                     ),
-                    className: 'fw-bold'
                   }}
-                  error={touched.workMobile && !!errors.workMobile}
-                  helperText={touched.workMobile && errors.workMobile}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
                   onKeyPress={(e) => {
+                    // Allow only digits (0-9)
                     if (!/[0-9]/.test(e.key)) {
                       e.preventDefault();
                     }
                   }}
+                  error={touched.workMobile && !!errors.workMobile}
+                  helperText={touched.workMobile && errors.workMobile}
                 />
               </div>
             </div>
@@ -253,6 +507,28 @@ const HRRegistration = ({ setSelectedView }) => {
                   name="emergencyContactName"
                   error={touched.emergencyContactName && !!errors.emergencyContactName}
                   helperText={touched.emergencyContactName && errors.emergencyContactName}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
                 />
               </div>
               <div className="intern_reg_form_group">
@@ -264,6 +540,28 @@ const HRRegistration = ({ setSelectedView }) => {
                   name="emergencyContactAddress"
                   error={touched.emergencyContactAddress && !!errors.emergencyContactAddress}
                   helperText={touched.emergencyContactAddress && errors.emergencyContactAddress}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  InputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
+                  }}
                 />
               </div>
               <div className="intern_reg_form_group">
@@ -273,8 +571,12 @@ const HRRegistration = ({ setSelectedView }) => {
                   variant="outlined"
                   className="intern_reg_input"
                   name="emergencyContactMobile"
-                  inputProps={{ 
-                    maxLength: 10, 
+                  inputProps={{
+                    style: {
+                      color: '#ffffff',          // Text color
+                      borderColor: '#ffffff'     // Outline color
+                    },
+                    maxLength: 10,
                     inputMode: 'numeric', // Ensures numeric keyboard on mobile devices
                     pattern: '[0-9]*' // Ensures only numbers are allowed
                   }}
@@ -284,7 +586,22 @@ const HRRegistration = ({ setSelectedView }) => {
                         <span className="bg-secondary-subtle rounded p-2">+91</span>
                       </InputAdornment>
                     ),
-                    className: 'fw-bold'
+                  }}
+                  InputLabelProps={{
+                    style: { color: '#ffffff' } // Label color
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#ffffff', // Default border color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#ffffff', // Hover border color
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#ffffff', // Focused border color
+                      },
+                    },
                   }}
                   error={touched.emergencyContactMobile && !!errors.emergencyContactMobile}
                   helperText={touched.emergencyContactMobile && errors.emergencyContactMobile}
@@ -313,3 +630,4 @@ const HRRegistration = ({ setSelectedView }) => {
 };
 
 export default HRRegistration;
+

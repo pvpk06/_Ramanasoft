@@ -6,7 +6,7 @@ import './styles/internDash.css';
 import AppliedJobs from './AppliedJobs.js';
 import Profile from './Profile.js';
 import HrViewJob from './JobPortal.js';
-import p3 from '../images/p3.jpeg'
+import p3 from '../images/p3.png'
 import Quiz from './quiz/Quiz.js';
 import Cookies from 'js-cookie';
 const GuestDashboard = () => {
@@ -112,3 +112,4 @@ const GuestDashboard = () => {
 };
 
 export default GuestDashboard;
+

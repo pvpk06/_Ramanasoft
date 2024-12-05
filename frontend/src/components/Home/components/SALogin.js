@@ -84,19 +84,85 @@ const SuperAdminLogin = () => {
 
 
   return (
-    <div className='login'>
-      <div className="container d-flex flex-column justify-content-center align-items-center" style={{ height: '85vh' }}>
-        <img alt='logo' className='rounded mb-3' src={ramana} style={{ width: '200px', height: 'auto' }} />
 
-        <div className="border rounded shadow p-3 d-flex flex-column align-items-center bg-white" style={{ width: '100%', maxWidth: '500px' }}>
-          <h4 className='fw-bold mb-4 mt-2 text-nowrap' style={{ fontFamily: 'monospace' }}>
+    // <div className='login'>
+    //   <div className="container d-flex flex-column justify-content-center align-items-center" style={{ height: '85vh' }}>
+    //     <img alt='logo' className='rounded mb-3' src={ramana} style={{ width: '200px', height: 'auto' }} />
+
+    //     <div className="border rounded shadow p-3 d-flex flex-column align-items-center bg-white" style={{ width: '100%', maxWidth: '500px' }}>
+    //       <h4 className='fw-bold mb-4 mt-2 text-nowrap' style={{ fontFamily: 'monospace' }}>
+    //         SuperAdmin Login <i className="fa-solid fa-right-to-bracket"></i>
+    //       </h4>
+
+    //       <TextField
+    //         label="Username"
+    //         variant="outlined"
+    //         className="w-100 mb-3"
+    //         name="username"
+    //         value={formData.username}
+    //         onChange={handleChange}
+    //         required
+    //         error={Boolean(errors.username)}
+    //         helperText={errors.username}
+    //         InputLabelProps={{ className: 'fw-bold text-secondary' }}
+    //       />
+
+    //       <TextField
+    //         label="Password"
+    //         variant="outlined"
+    //         type={showPassword ? 'text' : 'password'}
+    //         className="w-100 mb-3"
+    //         name="password"
+    //         value={formData.password}
+    //         onChange={handleChange}
+    //         required
+    //         error={Boolean(errors.password)}
+    //         helperText={errors.password}
+    //         InputLabelProps={{ className: 'fw-bold text-secondary' }}
+    //         InputProps={{
+    //           endAdornment: (
+    //             <InputAdornment position="end">
+    //               <IconButton
+    //                 aria-label="toggle password visibility"
+    //                 onClick={handleClickShowPassword}
+    //                 onMouseDown={handleMouseDownPassword}
+    //                 edge="end"
+    //                 style={{
+    //                   padding: '8px',
+    //                   borderRadius: '50%',
+    //                 }}
+    //               >
+    //                 {showPassword ? <VisibilityOff /> : <Visibility />}
+    //               </IconButton>
+
+    //             </InputAdornment>
+    //           ),
+    //         }}
+    //       />
+
+    //       <Button
+    //         variant="contained"
+    //         color="primary"
+    //         onClick={handleSubmit}
+    //         className='w-50'
+    //       >
+    //         Login
+    //       </Button>
+    //     </div>
+    //   </div>
+    // </div>
+
+    <div className='login'>
+      <div className="container d-flex flex-column justify-content-center" style={{ height: '80vh' }}>
+        <div className="border rounded shadow p-3 d-flex flex-column align-items-center bg-none" style={{ width: '100%', maxWidth: '500px' }}>
+          <h4 className='fw-bold mb-4 mt-2 text-nowrap text-white' style={{ fontFamily: 'monospace' }}>
             SuperAdmin Login <i className="fa-solid fa-right-to-bracket"></i>
           </h4>
 
           <TextField
             label="Username"
             variant="outlined"
-            className="w-100 mb-3"
+            className="w-100 mb-4"
             name="username"
             value={formData.username}
             onChange={handleChange}
@@ -104,13 +170,29 @@ const SuperAdminLogin = () => {
             error={Boolean(errors.username)}
             helperText={errors.username}
             InputLabelProps={{ className: 'fw-bold text-secondary' }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'white',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'white',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'white',
+                },
+              },
+              '& .MuiOutlinedInput-input': {
+                color: 'white', // White text color
+              },
+            }}
           />
 
           <TextField
             label="Password"
             variant="outlined"
             type={showPassword ? 'text' : 'password'}
-            className="w-100 mb-3"
+            className="w-100 mb-5"
             name="password"
             value={formData.password}
             onChange={handleChange}
@@ -137,13 +219,29 @@ const SuperAdminLogin = () => {
                 </InputAdornment>
               ),
             }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'white',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'white',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'white',
+                },
+              },
+              '& .MuiOutlinedInput-input': {
+                color: 'white', // White text color
+              },
+            }}
           />
 
           <Button
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            className='w-50'
+            className='w-50 border border-1 bg-transparent'
           >
             Login
           </Button>

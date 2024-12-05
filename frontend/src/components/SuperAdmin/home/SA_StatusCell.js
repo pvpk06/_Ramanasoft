@@ -25,7 +25,6 @@ const SAStatusCell = ({ value, row, updateStatus, isEditing }) => {
         >
           <option value="applied">Applied</option>
           <option value="qualified">Qualified</option>
-          <option value="not-qualified">Not Qualified</option>
           <option value="placed">Placed</option>
           <option value="not-placed">Not Placed</option>
           <option value="not-attended">Not Attended</option>

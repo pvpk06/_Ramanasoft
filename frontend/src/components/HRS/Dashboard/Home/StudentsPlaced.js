@@ -6,12 +6,14 @@ import * as XLSX from 'xlsx';
 import StatusCell from './StatusCell'; // Import the StatusCell component
 import { Container, Row, Col, Button, Form, Table,Alert } from 'react-bootstrap'; 
 import Cookies from 'js-cookie'
+import './SpinnerStyles.css'
+
 import apiService from '../../../../apiService';
 const HrId=Cookies.get('HRid')
 
 //const statusInfo={'applied':'Applied','qualified':'Qualified','placed':'Placed','not-placed':'Not Placed','not-attended':'Not Attended','interns-not-interested':'Not Interested','not-eligible':'Not Eligible','eligible':'Eligible/Profile Sent','under-progress':'Yet to receive feedback','level-1':'Level 1','level-2':'Level 2','level-3':'Level 3'}
 
-const statusInfo={'applied':'Applied','qualified':'Qualified','not-qualified':'Not Qualified','placed':'Placed','not-placed':'Not Placed','not-attended':'Not Attended','interns-not-interested':'Not Interested','not-eligible':'Not Eligible','eligible':'Eligible/Profile Sent','under-progress':'Yet to receive feedback','level-1':'Level 1','level-2':'Level 2','level-3':'Level 3'}
+const statusInfo={'applied':'Applied','qualified':'Qualified','placed':'Placed','not-placed':'Not Placed','not-attended':'Not Attended','interns-not-interested':'Not Interested','not-eligible':'Not Eligible','eligible':'Eligible/Profile Sent','under-progress':'Yet to receive feedback','level-1':'Level 1','level-2':'Level 2','level-3':'Level 3'}
 
 
 
@@ -23,6 +25,7 @@ const StudentsPlaced = ({ status }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownValue, setDropdownValue] = useState('changeStatus');
+  const [loading, setLoading] = useState(true);
 
   const toggleEditing = (applicationID) => {
     setData(prevData => prevData.map(app =>
@@ -76,6 +79,23 @@ const StudentsPlaced = ({ status }) => {
     };
       fetchData();    
   }, []);
+
+
+  
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 2000);
+  }, []);
+
+  const spinnerStyle = {
+    border: '4px solid rgba(0, 0, 0, 0.1)',
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    borderLeftColor: '#09f',
+    marginBottom:"40px",
+    animation: 'spin 1s linear infinite',
+  };
+
 
   useEffect(()=>{
     const fetchJobData = async () => {
@@ -376,7 +396,6 @@ const StudentsPlaced = ({ status }) => {
               <option value="changeStatus">Change Status</option>
               <option value="applied">Applied</option>
               <option value="qualified">Qualified</option>
-              <option value="not-qualified">Not Qualified</option>
               <option value="placed">Placed</option>
               <option value="not-placed">Not Placed</option>
               <option value="not-attended">Not Attended</option>
@@ -446,6 +465,9 @@ const StudentsPlaced = ({ status }) => {
             
           </Col>
         </Row>
+        {loading ? (
+        <div style={spinnerStyle} className="spinner"></div>
+      ) : (
         <Row>
           {data.length>0?(<Col>
             <Table {...getTableProps()} bordered hover responsive className='table-striped'>
@@ -490,6 +512,7 @@ const StudentsPlaced = ({ status }) => {
           </Col>):(<Alert variant="danger">No data to show</Alert>)}
           
         </Row>
+      )}
         <Row className='d-flex justify-content-between mt-3'>
           <Col md={4} style={{width:'70%'}}>
             <Button onClick={() => previousPage()} disabled={!canPreviousPage} className='btn btn-secondary'>
@@ -509,3 +532,4 @@ const StudentsPlaced = ({ status }) => {
 };
 
 export default StudentsPlaced;
+

@@ -28,7 +28,6 @@ const HrPortal = () => {
   //   const [statistics, setStatistics] = useState([
   //     { title: 'Total Students Applied', value: 0, link: '/hr_dash/students-applied', color: '#2563eb', element: IoPersonAddSharp },       // Royal Blue
   //     { title: 'Total Students Qualified', value: 0, link: '/hr_dash/students-qualified', color: '#059669', element: FaCheck },            // Emerald
-  //     { title: 'Total Students Not Qualified', value: 0, link: '/hr_dash/students-not-qualified', color: '#dc2626', element: FaCheck },    // Red
 
   //     { title: 'Total Students Placed', value: 0, link: '/hr_dash/students-placed', color: '#0891b2', element: FaUserTie },                // Cyan
   //     { title: 'Total Students Not Placed', value: 0, link: '/hr_dash/students-not-placed', color: '#7c3aed', element: FaTimes },         // Violet
@@ -45,7 +44,6 @@ const HrPortal = () => {
   // const [statistics, setStatistics] = useState([
   //   { title: 'Total Students Applied', value: 0, link: '/hr_dash/students-applied', color: '#2563eb', element: FaUserPlus },          
   //   { title: 'Total Students Qualified', value: 0, link: '/hr_dash/students-qualified', color: '#86efac', element: FaMedal },         
-  //   { title: 'Total Students Not Qualified', value: 0, link: '/hr_dash/students-not-qualified', color: '#dc2626', element: FaUserTimes }, 
 
   //   { title: 'Total Students Placed', value: 0, link: '/hr_dash/students-placed', color: '#059669', element: FaUserGraduate },        
   //   { title: 'Total Students Not Placed', value: 0, link: '/hr_dash/students-not-placed', color: '#c4b5fd', element: FaUserClock },   
@@ -62,7 +60,6 @@ const HrPortal = () => {
   const [statistics, setStatistics] = useState([
     { title: 'Total Students Applied', value: 0, link: '/hr_dash/students-applied', color: '#37a6b8', element: FaUserPlus },
     { title: 'Total Students Qualified', value: 0, link: '/hr_dash/students-qualified', color: '#e8c93f', element: FaUserGraduate },
-    { title: 'Total Students Not Qualified', value: 0, link: '/hr_dash/students-not-qualified', color: '#0284c7', element: FaUserTimes },
 
     { title: 'Total Students Placed', value: 0, link: '/hr_dash/students-placed', color: '#21bf40', element: FaMedal },
     { title: 'Total Students Not Placed', value: 0, link: '/hr_dash/students-not-placed', color: '#f73643', element: FaUserClock },
@@ -93,7 +90,8 @@ const HrPortal = () => {
     { title: 'Profiles Sent', value: 0, link: '/hr_dash/profiles-sent', color: '#15803d', element: FaPaperPlane },
     { title: 'Drive Scheduled', value: 0, link: '/hr_dash/drive-scheduled', color: '#7dd3fc', element: FaCalendarCheck },
 
-    { title: 'Drive Done/Offer received', value: 0, link: '/hr_dash/drive-done', color: '#047857', element: FaFile },
+    { title: 'Drive Done', value: 0, link: '/hr_dash/drive-done', color: '#047857', element: FaFile },
+    { title: 'Offer received', value: 0, link: '/hr_dash/offer-received', color: '#047857', element: FaFile },
     { title: 'Not interested HRs', value: 0, link: '/hr_dash/not-interested', color: '#fa8072', element: FaThumbsDown }
   ]);
 
@@ -143,7 +141,6 @@ const HrPortal = () => {
         console.log("Doing apis")
         const appliedResponse = await apiService.get(`/api/hr-statistics/?status=applied&hrId=${HrId}`);
         const qualifiedResponse = await apiService.get(`/api/hr-statistics/?status=qualified&hrId=${HrId}`);
-        const notqualifiedResponse = await apiService.get(`/api/hr-statistics/?status=not-qualified&hrId=${HrId}`);
 
         const placedResponse = await apiService.get(`/api/hr-statistics/?status=placed&hrId=${HrId}`);
         const notPlacedResponse = await apiService.get(`/api/hr-statistics/?status=not-placed&hrId=${HrId}`);
@@ -165,10 +162,6 @@ const HrPortal = () => {
               return { ...stat, value: appliedResponse.data.count };
             case 'Total Students Qualified':
               return { ...stat, value: qualifiedResponse.data.count };
-
-            case 'Total Students Not Qualified':
-              return { ...stat, value: notqualifiedResponse.data.count };
-
 
             case 'Total Students Placed':
               return { ...stat, value: placedResponse.data.count };
@@ -206,6 +199,7 @@ const HrPortal = () => {
         const profilesSentResponse = await apiService.get(`/api/hr-job-statistics/?status=profiles-sent&hrId=${HrId}`);
         const driveScheduledResponse = await apiService.get(`/api/hr-job-statistics/?status=drive-scheduled&hrId=${HrId}`);
         const driveDoneResponse = await apiService.get(`/api/hr-job-statistics/?status=drive-done&hrId=${HrId}`);
+        const offerReceivedResponse = await apiService.get(`/api/hr-job-statistics/?status=offer-received&hrId=${HrId}`);
         const notInterestedResponse = await apiService.get(`/api/hr-job-statistics/?status=not-interested&hrId=${HrId}`);
 
 
@@ -222,8 +216,11 @@ const HrPortal = () => {
                 return { ...stat, value: profilesSentResponse.data.count };
               case 'Drive Scheduled':
                 return { ...stat, value: driveScheduledResponse.data.count };
-              case 'Drive Done/Offer received':
+              case 'Drive Done':
                 return { ...stat, value: driveDoneResponse.data.count };
+                case 'Offer received':
+                  return { ...stat, value: offerReceivedResponse.data.count };
+                
               case 'Not interested HRs':
                 return { ...stat, value: notInterestedResponse.data.count };
               default:
@@ -650,4 +647,5 @@ const HrPortal = () => {
 };
 
 export default HrPortal;
+
 

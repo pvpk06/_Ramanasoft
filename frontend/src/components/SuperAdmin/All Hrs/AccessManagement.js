@@ -12,7 +12,7 @@ import {
   Dialog
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { ToastContainer, toast } from 'react-toastify'; // Importing toast
+import { ToastContainer, toast } from 'react-toastify';
 import apiService from '../../../apiService';
 
 const AccessManagement = ({ hrId, onClose }) => {
@@ -21,14 +21,29 @@ const AccessManagement = ({ hrId, onClose }) => {
 
   const menuItems = [
     { id: 'home', label: 'Home Dashboard' },
-    { id: 'jobGallery', label: 'Job Gallery' },
+    { 
+      id: 'jobGallery', 
+      label: 'Jobs Gallery',
+      submenu: [
+        { id: 'postjob', label: 'Post a Job' },
+        { id: 'jobs', label: 'All Jobs' },
+        { id: 'companies', label: 'Companies' }
+      ]
+    },
     { id: 'lms', label: 'Learning Management' },
     { id: 'quiz', label: 'Quiz Management' },
     { id: 'internRequests', label: 'Internship Requests' },
     { id: 'guestRequests', label: 'Guest Requests' },
     { id: 'internshipCertificate', label: 'Internship Certificates' },
     { id: 'offerLetter', label: 'Offer Letters' },
-    { id: 'bulkRegister', label: 'Bulk Registration' },
+    { 
+      id: 'bulkRegister', 
+      label: 'Bulk Registration',
+      submenu: [
+        { id: 'bulkIntern', label: 'Interns' },
+        { id: 'bulkGuest', label: 'Guests' }
+      ]
+    },
     { id: 'profile', label: 'Profile Management' }
   ];
 
@@ -38,15 +53,15 @@ const AccessManagement = ({ hrId, onClose }) => {
         setLoading(true);
         const response = await apiService.get(`/api/hr_access/${hrId}`);
         const data = response.data.access;
-        console.log(data);
-        const accessObject = {};
+
+        // Initialize access with "home" and "profile" always enabled
+        const accessObject = { home: true, profile: true };
         data.forEach(item => {
-            console.log(item);
           accessObject[item] = true;
         });
         setSelectedAccess(accessObject);
       } catch (err) {
-        toast.error('Failed to load current access settings'); // Show toast on error
+        toast.error('No data found/Failed to load current access settings');
       } finally {
         setLoading(false);
       }
@@ -55,34 +70,76 @@ const AccessManagement = ({ hrId, onClose }) => {
     fetchCurrentAccess();
   }, [hrId]);
 
-  const handleToggleAccess = (menuId) => {
-    setSelectedAccess(prev => ({
-      ...prev,
-      [menuId]: !prev[menuId]
-    }));
+  const handleToggleAccess = (menuId, menuItem) => {
+    setSelectedAccess(prev => {
+      // Prevent toggling "home" and "profile"
+      if (menuId === 'home' || menuId === 'profile') return prev;
+
+      const newAccess = { ...prev };
+      newAccess[menuId] = !prev[menuId];
+
+      if (menuItem.submenu) {
+        // Toggle all submenu items
+        menuItem.submenu.forEach(subItem => {
+          newAccess[subItem.id] = newAccess[menuId];
+        });
+      }
+
+      menuItems.forEach(item => {
+        if (item.submenu) {
+          const subMenuIds = item.submenu.map(sub => sub.id);
+          if (subMenuIds.includes(menuId)) {
+            const allSubMenuSelected = item.submenu.every(sub => newAccess[sub.id]);
+            newAccess[item.id] = allSubMenuSelected;
+          }
+        }
+      });
+
+      return newAccess;
+    });
   };
 
   const handleSaveAccess = async () => {
     try {
       setLoading(true);
-      // Convert object back to array of selected items
       const selectedItems = Object.entries(selectedAccess)
-        .filter(([_, value]) => value)
+        .filter(([key, value]) => value)
         .map(([key]) => key);
 
       await apiService.put(`/api/hr_access/${hrId}`, {
         accessRights: selectedItems
       });
 
-      toast.success('Access rights updated successfully'); // Show success toast
+      toast.success('Access rights updated successfully');
       setTimeout(() => {
         onClose();
       }, 2000);
     } catch (err) {
-      toast.error('Failed to update access settings'); // Show toast on error
+      toast.error('Failed to update access settings');
       setLoading(false);
     }
   };
+
+  const renderMenuItem = (item, level = 0) => (
+    <Box key={item.id} sx={{ ml: level * 3 }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={!!selectedAccess[item.id]}
+            onChange={() => handleToggleAccess(item.id, item)}
+            disabled={loading || item.id === 'home' || item.id === 'profile'}
+          />
+        }
+        label={item.label}
+        sx={{ mb: 1 }}
+      />
+      {item.submenu && (
+        <Box sx={{ ml: 3 }}>
+          {item.submenu.map(subItem => renderMenuItem(subItem, level + 1))}
+        </Box>
+      )}
+    </Box>
+  );
 
   return (
     <Dialog 
@@ -106,20 +163,7 @@ const AccessManagement = ({ hrId, onClose }) => {
 
         <FormControl component="fieldset" sx={{ width: '100%' }}>
           <FormGroup>
-            {menuItems.map((item) => (
-              <FormControlLabel
-                key={item.id}
-                control={
-                  <Checkbox
-                    checked={!!selectedAccess[item.id]}
-                    onChange={() => handleToggleAccess(item.id)}
-                    disabled={loading}
-                  />
-                }
-                label={item.label}
-                sx={{ mb: 1 }}
-              />
-            ))}
+            {menuItems.map(item => renderMenuItem(item))}
           </FormGroup>
         </FormControl>
 
@@ -150,7 +194,6 @@ const AccessManagement = ({ hrId, onClose }) => {
           </Button>
         </Box>
 
-        {/* ToastContainer for displaying notifications */}
         <ToastContainer />
       </Paper>
     </Dialog>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Checkbox, FormControlLabel } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Checkbox, FormControlLabel, Link } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfo, faTimes, faBars, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { faEthereum } from '@fortawesome/free-brands-svg-icons';
+
 import Joyride from 'react-joyride';
-import { useNavigate } from 'react-router-dom';
 import './styles/internDash.css';
 import AppliedJobs from './AppliedJobs.js';
 import Profile from './Profile.js';
@@ -16,7 +17,12 @@ import Home from './intern_home.js';
 import Cookies from 'js-cookie'
 import apiService from '../../apiService.js';
 import CloseIcon from '@mui/icons-material/Close';
+import Achievements from './Achievements/Achievements.js';
+// import ResumeDash from './BuildYourResume/resumeDash.js';
 
+import img1 from '../Home/images/Carousel/img1.jpg'
+import img2 from '../Home/images/Carousel/img2.jpg'
+import img3 from '../Home/images/Carousel/img3.jpg'
 
 const WelcomeTour = ({ onStart, onSkip }) => {
   return (
@@ -134,7 +140,7 @@ const InternDashboard = ({ defaultTab }) => {
   const [guidelinesAccepted, setGuidelinesAccepted] = useState(false); // New state for guidelines status
   const candidateID = Cookies.get('internID');
   console.log("candidateID, ", candidateID);
-  
+
   const menuItems = [
     { id: 'Dashboard', name: 'Dashboard', icon: 'fas fa-home' },
     { id: 'LMS', name: 'LMS', icon: 'fas fa-book' },
@@ -142,6 +148,10 @@ const InternDashboard = ({ defaultTab }) => {
     { id: 'Jobs', name: 'Jobs', icon: 'fas fa-chalkboard-user' },
     { id: 'Applied', name: 'Applied', icon: 'fas fa-edit' },
     { id: 'Profile', name: 'Profile', icon: 'fas fa-user' },
+    { id: 'Resume', name: 'Resume', icon: 'fas fa-user' },
+    { id: 'noysi', name: 'Noysi', icon: 'far fa-comment-alt' },
+    { id: 'Achievements', name: 'Achievements', icon: 'fas fa-user' },
+
   ];
 
   useEffect(() => {
@@ -174,49 +184,6 @@ const InternDashboard = ({ defaultTab }) => {
     }
   };
 
-  // // Tour steps configuration
-  // const tourSteps = [
-  //   {
-  //     target: '.intern-toggle-button',
-  //     content: 'Toggle the sidebar to expand or collapse it',
-      // placement: 'right'
-  //   },
-  //   {
-  //     target: '#menu-item-Dashboard',
-  //     content: 'View your dashboard overview',
-  //     placement: 'right'
-  //   },
-  //   {
-  //     target: '#menu-item-Applied',
-  //     content: 'Check your applied jobs',
-  //     placement: 'right'
-  //   },
-  //   {
-  //     target: '#menu-item-Jobs',
-  //     content: 'Browse available job opportunities',
-  //     placement: 'right'
-  //   },
-  //   {
-  //     target: '#menu-item-LMS',
-  //     content: 'Access learning materials',
-  //     placement: 'right'
-  //   },
-  //   {
-  //     target: '#menu-item-Quiz',
-  //     content: 'Take assessment quizzes',
-  //     placement: 'right'
-  //   },
-  //   {
-  //     target: '#menu-item-Profile',
-  //     content: 'Update your profile information',
-  //     placement: 'right'
-  //   },
-  //   {
-  //     target: '.Logout',
-  //     content: 'Sign out of your account',
-  //     placement: 'top'
-  //   }
-  // ];
   const animatedImageUrl = 'https://img.freepik.com/premium-vector/cute-kawaii-robot-character-friendly-chat-bot-assistant-online-applications-cartoon-vector-illustration_1093343-236.jpg'; // Replace with the actual path to your animated guide image
 
   
@@ -344,8 +311,21 @@ const InternDashboard = ({ defaultTab }) => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+
+  const NoysiRedirect = () => {
+    useEffect(() => {
+      window.open("https://connect.ramanasoft.com", "_blank");
+    }, []);
+  
+    return null;
+  };
+  
+  
   const renderContent = () => {
     switch (selectedView) {
+      // case 'Resume':
+      //   return <ResumeDash />
+        
       case 'Dashboard':
         return <Home setSelectedView={setSelectedView} />;
       case 'Applied':
@@ -357,13 +337,42 @@ const InternDashboard = ({ defaultTab }) => {
       case 'Profile':
         return <Profile />;
       case 'LMS':
-        return <Lmsdash />;
+        return <Lmsdash />;  
+        
+        case 'Achievements': 
+        return <Achievements />;
+        case 'noysi':
+          return <NoysiRedirect />;
+
       default:
         return <Home setSelectedView={setSelectedView} />;
     }
   };
+  
 
   return (
+    <>
+{/* <div id="carouselExampleRide" class="carousel slide" data-bs-ride="true" touch="true" wrap="true" style={{width:"100%", height:"5vh", background:"white"}} >
+  <div class="carousel-inner" style={{fontSize:"18px", textAlign:"center", alignItems:"center"}}>
+    <div class="carousel-item active">
+        <p>Project 01</p>
+    </div>
+    <div class="carousel-item">
+      <p>Project 02</p>
+    </div>
+    <div class="carousel-item">
+      <p>Project 03</p>
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div> */}
     <div className={`intern_dashboard ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       {showWelcome && (
         <WelcomeTour
@@ -424,12 +433,14 @@ const InternDashboard = ({ defaultTab }) => {
 
         <div className="icons-container">
           <ul>
-            {menuItems.map((item) => (
+            {menuItems
+            .filter((i) => (i.id !== "Achievements"))
+            .map((item) => (
               <li
                 key={item.id}
                 id={`menu-item-${item.id}`}
                 onClick={() => handleMenuItemClick(item.id)}
-                className={selectedView === item.name ? 'active' : ''}
+                className={selectedView === item.id ? 'active' : ''}
               >
                 <i className={item.icon}></i>
                 {isSidebarOpen && <span>{item.name}</span>}
@@ -464,6 +475,7 @@ const InternDashboard = ({ defaultTab }) => {
         {renderContent()}
       </div>
     </div>
+    </>
   );
 };
 
@@ -1125,3 +1137,4 @@ export default InternDashboard;
 // // };
 
 // // export default InternDashboard;
+

@@ -4,6 +4,11 @@ import { InputAdornment, Button, Menu, MenuItem, IconButton, TextField } from '@
 import ramana from '../images/p3.png';
 
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import { NavLink } from 'react-router-dom';
+import { FaInfo, FaPhone } from 'react-icons/fa';
+import { BsBriefcaseFill } from 'react-icons/bs';
+import { MdOutlineContactSupport } from "react-icons/md";
+import { HiInformationCircle } from "react-icons/hi";
 
 import img1 from '../images/Carousel/img1.jpg'
 import img2 from '../images/Carousel/img2.jpg'
@@ -313,26 +318,56 @@ const Home = ({ defaultTab }) => {
   const [errors, setErrors] = useState({ email: '', password: '' });
 
   useEffect(() => {
-    const HRid = Cookies.get('HRid');
-    const verified = Cookies.get('verified');
-    if (HRid && verified === 'true') {
-      navigate('/hr_dash');
+    const checkBlockStatusAndRedirect = async (userId, userType, dashboardRoute) => {
+      try {
+        // Fetch block status from the backend
+        const response = await apiService.get(`/api/${userType}-status/${userId}`);
+        
+        if (response.data.blockProfile) {
+          // If blocked, clear cookies and redirect to login
+          toast.error('Your account is blocked. Please contact support.', { autoClose: 5000 });
+          Cookies.remove(userType);
+          Cookies.remove('verified');
+          navigate('/login');
+        } else {
+          // If not blocked, navigate to the dashboard
+          navigate(dashboardRoute);
+        }
+      } catch (error) {
+        console.error(`Error checking block status for ${userType}:`, error);
+        toast.error('Unable to verify account status. Please try again later.', { autoClose: 5000 });
+      }
+    };
+  
+    const verified = Cookies.get('verified') === 'true'; // Simplify verified check
+  
+    if (verified) {
+      const HRid = Cookies.get('HRid');
+      if (HRid) {
+        checkBlockStatusAndRedirect(HRid, 'hr', '/hr_dash');
+        return; // Stop further checks if HR is verified
+      }
+  
+      const SAid = Cookies.get('SAid');
+      if (SAid) {
+        navigate('/SA_dash'); // Super admins are not checked for block status
+        return;
+      }
+  
+      const internID = Cookies.get('internID');
+      if (internID) {
+        checkBlockStatusAndRedirect(internID, 'intern', '/intern_dash');
+        return;
+      }
+  
+      const guestID = Cookies.get('guestID');
+      if (guestID) {
+        checkBlockStatusAndRedirect(guestID, 'guest', '/extern_dash');
+        return;
+      }
     }
-    const SAid = Cookies.get("SAid");
-    if (SAid && verified === 'true') {
-      navigate('/SA_dash')
-    }
-    const internID = Cookies.get("internID")
-    if (internID && verified === 'true') {
-      navigate('/intern_dash')
-    }
-
-    const guestID = Cookies.get("guestID")
-    if (guestID && verified === 'true') {
-      navigate('/extern_dash')
-    }
-
   }, [navigate]);
+  
 
 
 
@@ -380,7 +415,7 @@ const Home = ({ defaultTab }) => {
         toast.success('OTP sent successfully!', { autoClose: 5000 });
       } catch (error) {
         if (error.response) {
-          if (error.response.status === 404) {
+          if (error.response.status === 400) {
             toast.error('User not found, please register.', { autoClose: 5000 });
           } else if (error.response.status === 500) {
             toast.error('Server error, please try again later.', { autoClose: 5000 });
@@ -476,7 +511,12 @@ const Home = ({ defaultTab }) => {
           const statusCode = error.response.status;
           if (statusCode === 404) {
             toast.error('User not found', { autoClose: 5000 });
-          } else if (statusCode === 401) {
+          }
+          else if (statusCode === 405) {
+            toast.error('Your Profile is Blocked, Contact Admin !', { autoClose: 5000 });
+          }
+          
+          else if (statusCode === 401) {
             toast.error('Invalid credentials', { autoClose: 5000 });
           }
         } else {
@@ -529,18 +569,87 @@ const Home = ({ defaultTab }) => {
       //   return <JobDesc />
       case 'HRLogin':
         return (
-          <div className='login'>
-            <div className="container d-flex flex-column justify-content-center align-items-center" style={{ height: '85vh' }}>
-              <img alt='logo' className='rounded mb-3' src={ramana} style={{ width: '200px', height: 'auto' }} />
-              <div className="border rounded shadow p-3 d-flex flex-column align-items-center bg-white" style={{ width: '100%', maxWidth: '500px' }}>
-                <h4 className='fw-bold mb-4 mt-2 text-nowrap' style={{ fontFamily: 'monospace' }}>
+          // <div className='login'>
+          //   <div className="container d-flex flex-column justify-content-center align-items-center" style={{ height: '85vh' }}>
+          //     <img alt='logo' className='rounded mb-3' src={ramana} style={{ width: '200px', height: 'auto' }} />
+          //     <div className="border rounded shadow p-3 d-flex flex-column align-items-center bg-white" style={{ width: '100%', maxWidth: '500px' }}>
+          //       <h4 className='fw-bold mb-4 mt-2 text-nowrap' style={{ fontFamily: 'monospace' }}>
+          //         HR Login <i className="fa-solid fa-right-to-bracket"></i>
+          //       </h4>
+          //       <form onSubmit={handleSubmit}>
+          //         <TextField
+          //           label="Email"
+          //           variant="outlined"
+          //           className="w-100 mb-3"
+          //           name="email"
+          //           value={formData.email}
+          //           onChange={handleChange}
+          //           required
+          //           error={Boolean(errors.email)}
+          //           helperText={errors.email}
+          //           InputLabelProps={{ className: 'fw-bold text-secondary' }}
+          //         />
+
+          //         <TextField
+          //           label="Password"
+          //           variant="outlined"
+          //           type={showPassword ? 'text' : 'password'}
+          //           className="w-100 mb-3"
+          //           name="password"
+          //           value={formData.password}
+          //           onChange={handleChange}
+          //           required
+          //           error={Boolean(errors.password)}
+          //           helperText={errors.password}
+          //           InputLabelProps={{ className: 'fw-bold text-secondary' }}
+          //           InputProps={{
+          //             endAdornment: (
+          //               <InputAdornment position="end">
+          //                 <IconButton
+          //                   aria-label="toggle password visibility"
+          //                   onClick={handleClickShowPassword}
+          //                   onMouseDown={handleMouseDownPassword}
+          //                   edge="end"
+          //                 >
+          //                   {showPassword ? <VisibilityOff /> : <Visibility />}
+          //                 </IconButton>
+          //               </InputAdornment>
+          //             ),
+          //           }}
+          //         />
+
+          //         <Button
+          //           variant="contained"
+          //           color="primary"
+          //           type='submit'
+          //           className='w-100'
+          //         >
+          //           Login
+          //         </Button>
+          //       </form>
+          //       <div className="d-flex justify-content-center align-items-center w-100">
+          //         <Link
+          //           className='fw-bold text-center text-decoration-none text-primary p-2'
+          //           onClick={() => setSelectedView('HrReg')}
+          //         >
+          //           Register as HR ?
+          //         </Link>
+          //       </div>
+          //     </div>
+          //   </div>
+          // </div>
+          <div className="login">
+            <div className="container d-flex flex-column justify-content-center" style={{ height: '80vh' }}>
+              <div className="border rounded shadow p-3 d-flex flex-column align-items-center bg-none" style={{ width: '100%', maxWidth: '500px' }}>
+                <h4 className='fw-bold mb-4 mt-2 text-nowrap text-white' style={{ fontFamily: 'monospace' }}>
                   HR Login <i className="fa-solid fa-right-to-bracket"></i>
                 </h4>
+
                 <form onSubmit={handleSubmit}>
                   <TextField
                     label="Email"
                     variant="outlined"
-                    className="w-100 mb-3"
+                    className="w-100 mb-4"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -548,13 +657,29 @@ const Home = ({ defaultTab }) => {
                     error={Boolean(errors.email)}
                     helperText={errors.email}
                     InputLabelProps={{ className: 'fw-bold text-secondary' }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'white',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'white',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'white',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        color: 'white', // White text color
+                      },
+                    }}
                   />
 
                   <TextField
                     label="Password"
                     variant="outlined"
                     type={showPassword ? 'text' : 'password'}
-                    className="w-100 mb-3"
+                    className="w-100 mb-5"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
@@ -576,23 +701,39 @@ const Home = ({ defaultTab }) => {
                         </InputAdornment>
                       ),
                     }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'white',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'white',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'white',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        color: 'white', // White text color
+                      },
+                    }}
                   />
 
                   <Button
                     variant="contained"
-                    color="primary"
                     type='submit'
-                    className='w-100'
+                    className='w-100 border border-1 bg-transparent'
                   >
                     Login
                   </Button>
                 </form>
+
                 <div className="d-flex justify-content-center align-items-center w-100">
                   <Link
-                    className='fw-bold text-center text-decoration-none text-primary p-2'
+                    className='text-center text-decoration-none py-3 text-white'
                     onClick={() => setSelectedView('HrReg')}
                   >
-                    Register as HR ?
+                    Register as HR?
                   </Link>
                 </div>
               </div>
@@ -609,388 +750,158 @@ const Home = ({ defaultTab }) => {
                 <Carousel slides={slides} />
               </section>
   
-              <div className='container' style={{marginTop:"200px", marginBottom:"200px"}}>
+              <div className='container'>
   
-                <div style={{ position: 'sticky', width: '100%', height: '250px', textAlign: 'center', justifyContent: "center", top: '45%' }} className=''>
-                  <h1 style={{ fontSize: '100px', color: 'rgba(163,156,156,52%)' }}>What we have built</h1>
+                <div className='projects_container'>
+                  <h1>What we have built</h1>
                 </div>
   
+                <div className='projects_cards_container'>
   
-                <div style={{ position: 'relative', zIndex: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-  
-                  { /* PROJECT 01 */}
-                  <div
-                    style={{
-                      cursor:"pointer",
-                      width: '600px',
-                      height: '350px',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: "5px",
-                    }}
-                    onMouseEnter={() => setHover1(true)}
-                    onMouseLeave={() => setHover1(false)}
-                  >
-                    <img
-                      src={qtnext}
-                      width={'100%'}
-                      height={'100%'}
-                      alt=''
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        transition: 'all 0.5s ease-in-out',
-                        filter: hover1 ? 'brightness(25%)' : 'brightness(100%)'
-                      }}
-                    />
-  
-                    {/* Default text at the bottom */}
-                    {!hover1 &&
-                      <div
+                  <div className='row mb-5'>
+                    <div className='project1_card_container col-lg-6 col-sm-12'
+                      onMouseEnter={() => setHover1(true)}
+                      onMouseLeave={() => setHover1(false)}
+                    >
+                      <img
+                        src={qtnext}
+                        className='project1_cardimg_container'
+                        alt=''
                         style={{
-                          position: 'absolute',
-                          bottom: '10px',
-                          left: '10px',
-                          color: '#fff',
-                          fontSize: '16px',
-                          fontFamily: 'Verdana',
-                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                          padding: '8px 12px',
-                          borderRadius: '5px'
+                          filter: hover1 ? 'brightness(25%)' : 'brightness(100%)'
                         }}
-                      >
-                        <strong style={{textTransform:"uppercase"}}>QT Next</strong><br/> 
-                        A Practical tech training with live classes, hands-on learning, and certifications.
-                      </div>}
+                      />
   
-                    {/* Detailed description on hover */}
-                    {hover1 && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '90%',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          fontFamily: "Verdana",
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#fff',
-                          fontSize: '16px',
-                          padding: '40px 60px',
-                          opacity: hover1 ? 2 : 0,
-                          transition: "opacity 0.5s ease-in-out"
-                        }}
-                      >
-                        QT NEXT is a learning platform that offers courses, assessments, and certifications in fields like DevOps and programming. It emphasizes practical learning through live classes and hands-on training to prepare users for careers in tech.</div>
-                    )}
+                      {!hover1 &&
+                        <div className='project1_card_text'
+                        >
+                          Practical tech training with live classes, hands-on learning, and certifications
+                        </div>}
+  
+                      {hover1 && (
+                        <div className='project1_card_textHover'
+                          style={{
+                            opacity: hover1 ? 2 : 0,
+                            transition: "opacity 0.5s ease-in-out"
+                          }}
+                        >
+                          QT NEXT is a learning platform that offers courses, assessments, and certifications in fields like DevOps and programming. It emphasizes practical learning through live classes and hands-on training to prepare users for careers in tech.</div>
+                      )}
+                    </div>
                   </div>
   
-                  {/* PROJECT 02 */}
-                  <div style={{
-                    width: '600px',
-                    height: '350px',
-                    cursor:"pointer",
-                    alignSelf: 'flex-end',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    borderRadiu: '5px'
-                  }}
-                    onMouseEnter={() => setHover2(true)}
-                    onMouseLeave={() => setHover2(false)}>
+                  <div className='row justify-content-end mb-5'>
+                    <div className='project2_card_container  col-sm-12 col-lg-6 '
+                      onMouseEnter={() => setHover2(true)}
+                      onMouseLeave={() => setHover2(false)}>
   
-                    <img src={quantaspeach} alt='' style={{
-                      position: 'relative',
-                      transition: '0.5s ease',
-                      filter: hover2 ? 'brightness(25%)' : 'brightness(100%)',
-                      width: '100%',
-                      height: '100%',
-                    }} />
+                      <img src={quantaspeach} alt='' className='project2_cardimg_container' style={{
+                        filter: hover2 ? 'brightness(25%)' : 'brightness(100%)',
+                      }} />
   
-                    {/* Default text at the bottom */}
-                    {!hover2 &&
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '10px',
-                          left: '10px',
-                          color: '#fff',
-                          fontSize: '16px',
-                          fontFamily: 'Verdana',
-                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                          padding: '8px 12px',
-                          borderRadius: '5px'
-                        }}
-                      >
-                      <strong style={{textTransform:"uppercase"}}>QuantaSpeech</strong><br/> 
-                        An Quantum-powered software for enhanced speed, security, and real-time data insights.
-                      </div>
-                    }
+                      {!hover2 &&
+                        <div className='project2_card_text'
+                        >
+                          Quantum-powered software for enhanced speed, security, and real-time data insights
+                        </div>
+                      }
   
-                    {/* Detailed description on hover */}
-                    {hover2 && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          fontFamily: "Verdana",
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#fff',
-                          fontSize: '16px',
-                          padding: '40px 60px',
-                          opacity: hover2 ? 2 : 0,
-                          transition: "opacity 0.5s ease-in-out"
-                        }}
-                      >
-                        QuantaSpeech aims to integrate quantum computing into our software development process, leveraging its unique capabilities to transform key areas like cryptography, machine learning, and data optimization. By adopting quantum technologies, we aim to enhance our software’s speed, security, and performance, enabling more efficient data analysis and real-time decision-making.
-                      </div>
-                    )}
+                      {hover2 && (
+                        <div className='project2_card_textHover'
+                          style={{
+                            opacity: hover2 ? 2 : 0,
+                            transition: "opacity 0.5s ease-in-out"
+                          }}
+                        >
+                          Quanta Speech aims to integrate quantum computing into our software development process, leveraging its unique capabilities to transform key areas like cryptography, machine learning, and data optimization. By adopting quantum technologies, we aim to enhance our software’s speed, security, and performance, enabling more efficient data analysis and real-time decision-making.
+                        </div>
+                      )}
+                    </div>
                   </div>
   
-                  {/* PROJECT 03 */}
-                  <div style={{
-                    width: '600px',
-                    cursor:"pointer",
-                    height: '350px',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    borderRadius: '5px'
-                  }}
-                    onMouseEnter={() => setHover3(true)}
-                    onMouseLeave={() => setHover3(false)}
-                  >
+                  <div className='row mb-5'>
+                    <div className='project1_card_container col-sm-12 col-lg-6'
+                      onMouseEnter={() => setHover3(true)}
+                      onMouseLeave={() => setHover3(false)}
+                    >
   
-                    <img src={saythu} width={'100%'} height={'100%'} alt='' style={{
-                      position: 'relative',
-                      transition: 'all 0.5s ease',
-                      filter: hover3 ? 'brightness(25%)' : 'brightness(100%)',
-                      width: '100%',
-                      height: '100%',
-                    }} />
+                      <img src={saythu} alt='' style={{
+                        filter: hover3 ? 'brightness(25%)' : 'brightness(100%)',
+                      }} className='project1_cardimg_container' />
   
-                    {/* Default text at the bottom */}
-                    {
-                      !hover3 &&
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '10px',
-                          width:"100%",
-                          left: '10px',
-                          color: '#fff',
-                          fontSize: '16px',
-                          fontFamily: 'Verdana',
-                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                          padding: '8px 12px',
-                          borderRadius: '5px'
-                        }}
-                      >
-                      <strong style={{textTransform:"uppercase"}}>RoboMock</strong><br/> 
-                        A Generative AI-Based Source Code Analysis Tool.
-                      </div>
-                    }
+                      {
+                        !hover3 &&
+                        <div className='project1_card_text'>
+                          AI-driven tool for code analysis, quality checks, and vulnerability insights
+                        </div>
+                      }
   
-                    {/* Detailed description on hover */}
-                    {hover3 && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '90%',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          fontFamily: "Verdana",
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#fff',
-                          fontSize: '16px',
-                          padding: '40px 60px',
-                          opacity: hover3 ? 2 : 0,
-                          transition: "opacity 0.5s ease-in-out"
-                        }}
-                      >
-                        The Generative AI-Based Source Code Analysis Tool uses prompt engineering to analyze source code, providing insights into code structure, quality, and vulnerabilities. The tool supports file uploads in formats like .zip and .pdf, offering streamlined processing and reporting on recent code files to help teams maintain secure, high-quality, and optimized codebases.
-                      </div>
-                    )
-                    }
+                      {hover3 && (
+                        <div className='project1_card_textHover' style={{ opacity: hover3 ? 2 : 0, transition: "opacity 0.5s ease-in-out" }}>
+                          The Generative AI-Based Source Code Analysis Tool uses prompt engineering to analyze source code, providing insights into code structure, quality, and vulnerabilities. The tool supports file uploads in formats like .zip and .pdf, offering streamlined processing and reporting on recent code files to help teams maintain secure, high-quality, and optimized codebases.
+                        </div>
+                      )
+                      }
+                    </div>
                   </div>
   
-                  {/* PROJECT 04 */}
-                  <div
-                    style={{
-                      width: '600px',
-                      height: '350px',
-                      cursor:"pointer",
-                      position: 'relative',
-                      overflow: 'hidden',
-                      alignSelf: 'flex-end',
-                      borderRadius: "5px",
-                    }}
-                    onMouseEnter={() => setHover4(true)}
-                    onMouseLeave={() => setHover4(false)}
-                  >
-                    <img
-                      src={ilovehr}
-                      width={'100%'}
-                      height={'100%'}
-                      alt=''
-                      style={{
-                        width: '90%',
-                        height: '100%',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        fontFamily: "Garamond",
-                        transition: 'all 0.5s ease-in-out',
-                        filter: hover4 ? 'brightness(25%)' : 'brightness(100%)'
-                      }}
-                    />
+                  <div className='row justify-content-end mb-5'>
+                    <div className='project2_card_container col-sm-12 col-lg-6'
+                      onMouseEnter={() => setHover4(true)}
+                      onMouseLeave={() => setHover4(false)}
+                    >
+                      <img className='project2_cardimg_container' src={ilovehr} alt=''
+                        style={{ filter: hover4 ? 'brightness(25%)' : 'brightness(100%)' }}
+                      />
+                      {
+                        !hover4 &&
+                        <div className='project2_card_text'>
+                          Empowering HR as strategic partners to enrich and drive business value
+                        </div>
+                      }
   
-                    {/* Default text at the bottom */}
-                    {
-                      !hover4 &&
-                      <div
-                        style={{
-                          position: 'absolute',
-                          width: '90%',
-                          bottom: '10px',
-                          left: '0px',
-                          color: '#fff',
-                          fontSize: '16px',
-                          fontFamily: 'Verdana',
-                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                          padding: '8px 12px',
-                          borderRadius: '5px'
-                        }}
-                      >
-                      <strong style={{textTransform:"uppercase"}}>I LOVE HR</strong><br/> 
-                        A transformative initiative designed to evolve HR teams into proactive business partners.
-                      </div>
-                    }
-  
-                    {/* Detailed description on hover */}
-                    {hover4 && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          fontFamily: "Verdana",
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#fff',
-                          fontSize: '16px',
-                          padding: '40px 60px',
-                          opacity: hover4 ? 2 : 0,
-                          transition: "opacity 0.5s ease-in-out"
-                        }}
-                      >
-                        I Love HR is a transformative initiative aimed at evolving Human Resources (HR) teams from administrative and compliance-focused roles to proactive business partners that add significant value to organizations. The project focuses on enriching the company’s most vital asset—its people—by implementing strategic HR practices.
-                      </div>
-                    )}
+                      {hover4 && (
+                        <div className='project2_card_textHover' style={{ opacity: hover4 ? 2 : 0, transition: "opacity 0.5s ease-in-out" }}>
+                          I Love HR is a transformative initiative aimed at evolving Human Resources (HR) teams from administrative and compliance-focused roles to proactive business partners that add significant value to organizations. The project focuses on enriching the company’s most vital asset—its people—by implementing strategic HR practices.
+                        </div>
+                      )}
+                    </div>
                   </div>
   
-                  {/* PROJECT 05 */}
-                  <div
-                    style={{
-                      width: '600px',
-                      height: '350px',
-                      cursor:"pointer",
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: "5px",
-                    }}
-                    onMouseEnter={() => setHover5(true)}
-                    onMouseLeave={() => setHover5(false)}
-                  >
-                    <img
-                      src={homeinsurance}
-                      width={'100%'}
-                      height={'100%'}
-                      alt=''
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        transition: 'all 0.5s ease-in-out',
-                        filter: hover5 ? 'brightness(27%)' : 'brightness(100%)'
-                      }}
-                    />
+                  <div className='row'>
+                    <div className='project1_card_container col-sm-12 col-lg-6'
+                      onMouseEnter={() => setHover5(true)}
+                      onMouseLeave={() => setHover5(false)}
+                    >
+                      <img className='project1_cardimg_container'
+                        src={homeinsurance}
+                        alt=''
+                        style={{ filter: hover5 ? 'brightness(27%)' : 'brightness(100%)'}}
+                      />
   
-                    {/* Default text at the bottom */}
-                    {
-                      !hover5 &&
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '10px',
-                          left: '10px',
-                          color: '#fff',
-                          fontSize: '16px',
-                          fontFamily: 'Verdana',
-                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                          padding: '8px 12px',
-                          borderRadius: '5px'
-                        }}
-                      >
-                      <strong style={{textTransform:"uppercase"}}>Asset Assure</strong><br/> 
-                        An Efficient, automated management of property insurance policies and claims data.
-                      </div>
-                    }
+                      {
+                        !hover5 &&
+                        <div className='project1_card_text'>
+                          Efficient, automated management of property insurance policies and claims data
+                        </div>
+                      }
   
-                    {/* Detailed description on hover*/}
-                    {hover5 && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          fontFamily: "Verdana",
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#fff',
-                          fontSize: '16px',
-                          padding: '40px 60px',
-                          opacity: hover5 ? 2 : 0,
-                          transition: "opacity 0.5s ease-in-out"
-                        }}
-                      >
-                        The Property Insurance Management System is a robust software solution designed to automate and optimize the management of property insurance policies. The system enhances operational efficiency, reduces manual errors, and provides real-time access to policy and claims data, offering an end-to-end solution for managing property insurance.
-                      </div>
-                    )}
+                      {hover5 && (
+                        <div className='project1_card_textHover' style={{ opacity: hover5 ? 2 : 0, transition: "opacity 0.5s ease-in-out" }}>
+                          The Property Insurance Management System is a robust software solution designed to automate and optimize the management of property insurance policies. The system enhances operational efficiency, reduces manual errors, and provides real-time access to policy and claims data, offering an end-to-end solution for managing property insurance.
+                        </div>
+                      )}
+                    </div>
                   </div>
-  
   
                 </div>
   
               </div>
+  
             </div>
           );
-        
-        case 'SuperAdminLogin':
+  
+      case 'SuperAdminLogin':
         return <SuperAdminLogin />;
 
 
@@ -1015,7 +926,7 @@ const Home = ({ defaultTab }) => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <span className="rounded p-2" style={{ background:"none", color:"white"}}>+91</span>
+                        <span className="rounded p-2" style={{ background: "none", color: "white" }}>+91</span>
                       </InputAdornment>
                     ),
                     className: 'fw-bold',
@@ -1055,7 +966,7 @@ const Home = ({ defaultTab }) => {
                 <Button
                   variant="contained"
                   onClick={sendOtp}
-                  style={{color:"white", border:"2px solid white", background:"none"}}
+                  style={{ color: "white", border: "2px solid white", background: "none" }}
                   disabled={timer > 0}
                   className='w-50 sendotp'
                 >
@@ -1074,7 +985,7 @@ const Home = ({ defaultTab }) => {
                           className="text-center mx-1"
                           inputProps={{
                             maxLength: 1,
-                            style: { textAlign: 'center', fontWeight: 'bold',color:"white", width: '0.8rem', height: '0.8rem', border:"2px solid white" },
+                            style: { textAlign: 'center', fontWeight: 'bold', color: "white", width: '0.8rem', height: '0.8rem', border: "2px solid white" },
                           }}
                           value={digit}
                           onChange={(e) => handleOtpChange(e, index)}
@@ -1377,9 +1288,9 @@ const Home = ({ defaultTab }) => {
     //             </li>
     //           ))}
     //         <li>
-              // <Button variant="contained" color="primary" onClick={handleLoginClick} style={{ marginLeft: '20px', marginTop: "5px", background: "rgba(0, 0, 0, .08)", color: "white", border: "1px solid white" }}>
-              //   Login
-              // </Button>
+    // <Button variant="contained" color="primary" onClick={handleLoginClick} style={{ marginLeft: '20px', marginTop: "5px", background: "rgba(0, 0, 0, .08)", color: "white", border: "1px solid white" }}>
+    //   Login
+    // </Button>
     //         </li>
     //       </ul>
     //     </div>
@@ -1462,34 +1373,62 @@ const Home = ({ defaultTab }) => {
         </div>
       </section> */}
 
-      <nav class="navbar navbar-expand-md bg-body-dark sticky-top " data-bs-theme="dark" style={{zIndex: 1, background:"black"}}>
-        <div class="container-fluid">
-          <div className='navbar-brand'>
-            <Link to={'/'}>
-              <img src={ramana} width={'200px'} />
+
+      <nav className="navbar navbar-expand-md bg-body-dark sticky-top" data-bs-theme="dark" style={{ zIndex: 1, background: "black" }}>
+        <div className="container-fluid">
+          <div className="navbar-brand">
+            <Link to="/">
+              <img src={ramana} width="200px" alt="Logo" />
             </Link>
           </div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarTogglerDemo02"
+            aria-controls="navbarTogglerDemo02"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
           </button>
-          <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-            <div class="navbar-nav ms-auto d-flex align-items-center">
-              <div class="nav-item mx-3">
-                <Link to={'/about'} className='nav-link text-light fw-bold' style={{ fontSize: '18px' }}>About</Link>
+          <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
+            <div className="navbar-nav ms-auto d-flex align-items-center">
+              <div className="nav-item mx-4">
+                <NavLink
+                  to="/about"
+                  className={({ isActive }) => `nav-link newfont ${isActive ? 'active-link' : ''}`}
+                >
+                  <HiInformationCircle className="me-1" /> About
+                </NavLink>
               </div>
-              <div class="nav-item mx-3">
-                <Link to={'/jobs'} className='nav-link text-light fw-bold' style={{ fontSize: '18px' }}>Careers</Link>
+              <div className="nav-item mx-4">
+                <NavLink
+                  to="/jobs"
+                  className={({ isActive }) => `nav-link newfont ${isActive ? 'active-link' : ''}`}
+                >
+                  <BsBriefcaseFill className="me-1" /> Careers
+                </NavLink>
               </div>
-              <div class="nav-item mx-3">
-                <Link to={'/contact'} className='nav-link text-light fw-bold' style={{ fontSize: '18px' }}>Contact Us</Link>
+              <div className="nav-item mx-4">
+                <NavLink
+                  to="/contact"
+                  className={({ isActive }) => `nav-link newfont ${isActive ? 'active-link' : ''}`}
+                >
+                  <MdOutlineContactSupport className="me-1" /> Talk to Us
+                </NavLink>
               </div>
               <div>
-              <Button variant="contained" color="primary" onClick={handleLoginClick} style={{ marginLeft: '20px', marginTop: "5px", background: "rgba(0, 0, 0, .08)", color: "white", border: "1px solid white" }}>
-                Login
-              </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleLoginClick}
+                  style={{ marginLeft: '20px', marginTop: '5px', background: 'rgba(0, 0, 0, .08)', color: 'white', border: '1px solid white' }}
+                >
+                  Login
+                </Button>
               </div>
             </div>
-
           </div>
         </div>
       </nav>

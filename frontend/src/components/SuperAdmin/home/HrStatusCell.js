@@ -3,7 +3,7 @@ import { FaEdit } from 'react-icons/fa';
 
 const HrStatusCell = ({ value, row, updateStatus, isEditing }) => {
   console.log(value)
-    const statusInfo={'jd-received':'JD Received','profiles-sent':'Profiles sent','drive-scheduled':'Drive Scheduled','drive-done':'Drive Done','not-interested':"Not Interested"} 
+    const statusInfo={'jd-received':'JD Received','profiles-sent':'Profiles sent','drive-scheduled':'Drive Scheduled','drive-done':'Drive Done','offer-received':'Offer Received','not-interested':"Not Interested"} 
   const getStatusColor = (status) => {
     switch (status) {
       case 'In Progress':
@@ -29,6 +29,7 @@ const HrStatusCell = ({ value, row, updateStatus, isEditing }) => {
               <option value="profiles-sent">{statusInfo['profiles-sent']}</option>
               <option value="drive-scheduled">{statusInfo['drive-scheduled']}</option>
               <option value="drive-done">{statusInfo['drive-done']}</option>
+              <option value="offer-received">{statusInfo['offer-received']}</option>
               <option value="not-interested">{statusInfo['not-interested']}</option>
         </select>
       ) : (

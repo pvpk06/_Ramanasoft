@@ -262,7 +262,7 @@ const GuestRegistration = ({ setSelectedView }) => {
         {({ isSubmitting }) => (
           <Form className="w-100 intern_reg_section" autoComplete="off">
             <div style={{display:"flex", gap:"10px"}}>
-            <h2 className="intern_reg_section_title"> 
+            <h2 className="intern_reg_section_title" style={{color:"white"}} > 
               Guest Registration Form 
             </h2>
             <i style={{fontSize:"17px"}}> <FaFileSignature /> </i>
@@ -276,6 +276,28 @@ const GuestRegistration = ({ setSelectedView }) => {
                 name="fullName"
                 fullWidth
                 required
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                InputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
               />
               <ErrorMessage name="fullName" component="div" className="error-message" />
             </div>
@@ -288,6 +310,28 @@ const GuestRegistration = ({ setSelectedView }) => {
                 name="email"
                 fullWidth
                 required
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                InputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
               />
               <ErrorMessage name="email" component="div" className="error-message" />
             </div>
@@ -301,6 +345,10 @@ const GuestRegistration = ({ setSelectedView }) => {
                 fullWidth
                 required
                 inputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
                   maxLength: 10,
                   inputMode: 'numeric', // Ensures numeric keyboard on mobile devices
                   pattern: '[0-9]*' // Ensures only numbers are allowed
@@ -311,7 +359,22 @@ const GuestRegistration = ({ setSelectedView }) => {
                       <span className="bg-secondary-subtle rounded p-2">+91</span>
                     </InputAdornment>
                   ),
-                  className: 'fw-bold'
+                }}
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
                 }}
                 onKeyPress={(e) => {
                   // Allow only digits (0-9)
@@ -331,19 +394,42 @@ const GuestRegistration = ({ setSelectedView }) => {
                 name="altmobileno"
                 fullWidth
                 required
-                inputProps={{ maxLength: 10 }}
+                InputLabelProps={{
+                  style: { color: '#ffffff' }
+                }}
                 InputProps={{
+                  maxLength: 10,
+                  style: {
+                    color: '#ffffff',
+                    borderColor: '#ffffff'
+                  },
+                  
                   startAdornment: (
                     <InputAdornment position="start">
                       <span className="bg-secondary-subtle rounded p-2">+91</span>
                     </InputAdornment>
-                  ),
+                  )
                 }}
                 onKeyPress={(e) => {
+                  // Allow only digits (0-9)
                   if (!/[0-9]/.test(e.key)) {
                     e.preventDefault();
                   }
                 }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
+                inputProps={{ maxLength: 10 }}
               />
               <ErrorMessage name="altmobileno" component="div" className="error-message" />
             </div>
@@ -356,29 +442,82 @@ const GuestRegistration = ({ setSelectedView }) => {
                 name="address"
                 fullWidth
                 required
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                InputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
               />
               <ErrorMessage name="address" component="div" className="error-message" />
             </div>
 
             <div className="intern_reg_form_group">
               <FormControl fullWidth>
-                <InputLabel required>Domain</InputLabel>
-                <Field
+              <InputLabel required style={{ color: '#ffffff' }}>Domain</InputLabel>
+              <Field
                   as={Select}
                   label="Domain"
                   name="domain"
                   fullWidth
                   required
+                  sx={{
+                    color: '#ffffff', // Text color
+                    '.MuiInputBase-input': {
+                      color: '#ffffff', // Select text color
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                    '.MuiSvgIcon-root': {
+                      color: '#ffffff', // Dropdown arrow color
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#333333', // Dropdown menu background
+                        color: '#ffffff', // Dropdown menu text color
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="Cloud Data Engineer">Cloud Data Engineer</MenuItem>
-                  <MenuItem value="Al & Data Science">AI & Data Science</MenuItem>
+                  <MenuItem value="Data Science">Data Science</MenuItem>
                   <MenuItem value="DevOps & Cloud Computing">DevOps & Clooud Computing</MenuItem>
                   <MenuItem value="Testing Tools">Testing Tools</MenuItem>
                   <MenuItem value="Project Management & Agile">Project Management & Agile</MenuItem>
                   <MenuItem value="Business Analyst">Business Analyst</MenuItem>
                   <MenuItem value="Cyber Security">Cyber Security</MenuItem>
+                  <MenuItem value="Dot Net">Dot Net</MenuItem>
+                  <MenuItem value="Python Full Stack">Python Full Stack</MenuItem>
+                  <MenuItem value="Java Full Stack">Java Full Stack</MenuItem>
+                  <MenuItem value="MERN Full Stack">Mern Full Stack</MenuItem>
                   <MenuItem value="SalesForce">Salesforce</MenuItem>
-                  <MenuItem value="Full Stack Development">FullStack Development</MenuItem>
+                  <MenuItem value="Scrum Master">Scrum Master</MenuItem>
+                  <MenuItem value="Digital Marketing">Digital Marketing</MenuItem>
                   <MenuItem value="Medical Coding">Medical Coding</MenuItem>
                   <MenuItem value="Investment Banking">Investment Banking</MenuItem>
                   <MenuItem value="BI Reporting Tools">BI Reporting Tools</MenuItem>
@@ -391,13 +530,39 @@ const GuestRegistration = ({ setSelectedView }) => {
 
             <div className="intern_reg_form_group">
               <FormControl fullWidth>
-                <InputLabel required>Program</InputLabel>
+                <InputLabel required style={{color:"#ffffff"}}>Program</InputLabel>
                 <Field
                   as={Select}
                   label="Program"
                   name="program"
                   fullWidth
                   required
+                  sx={{
+                    color: '#ffffff', // Text color
+                    '.MuiInputBase-input': {
+                      color: '#ffffff', // Select text color
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                    '.MuiSvgIcon-root': {
+                      color: '#ffffff', // Dropdown arrow color
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#333333', // Dropdown menu background
+                        color: '#ffffff', // Dropdown menu text color
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="Training">Training</MenuItem>
                   <MenuItem value="JOIP">JOIP</MenuItem>
@@ -418,7 +583,29 @@ const GuestRegistration = ({ setSelectedView }) => {
                 name="batchno"
                 fullWidth
                 required
-
+                
+                InputLabelProps={{
+                  style: { color: '#ffffff' } // Label color
+                }}
+                InputProps={{
+                  style: {
+                    color: '#ffffff',          // Text color
+                    borderColor: '#ffffff'     // Outline color
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                  },
+                }}
                 inputProps={{ 
                   inputMode: 'numeric',
                   pattern: '[0-9]*'
@@ -432,13 +619,39 @@ const GuestRegistration = ({ setSelectedView }) => {
 
             <div className="intern_reg_form_group">
               <FormControl fullWidth>
-                <InputLabel required>Mode of Training</InputLabel>
+                <InputLabel required style={{color:"white"}}>Mode of Training</InputLabel>
                 <Field
                   as={Select}
                   label="Mode of Internship"
                   name="modeOfTraining"
                   fullWidth
                   required
+                  sx={{
+                    color: '#ffffff', // Text color
+                    '.MuiInputBase-input': {
+                      color: '#ffffff', // Select text color
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                    '.MuiSvgIcon-root': {
+                      color: '#ffffff', // Dropdown arrow color
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#333333', // Dropdown menu background
+                        color: '#ffffff', // Dropdown menu text color
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="Online">Online</MenuItem>
                   <MenuItem value="Offline">Offline</MenuItem>
@@ -450,12 +663,38 @@ const GuestRegistration = ({ setSelectedView }) => {
 
             <div className="intern_reg_form_group">
               <FormControl component="fieldset">
-                <FormLabel component="legend" required>Belonged To Vasavi Foundation</FormLabel>
+                <FormLabel component="legend" required style={{color:"white"}}>Belonged To Vasavi Foundation</FormLabel>
                 <Field
                   as={RadioGroup}
                   name="BelongedToVasaviFoundation"
                   row
                   required
+                  sx={{
+                    color: '#ffffff', // Text color
+                    '.MuiInputBase-input': {
+                      color: '#ffffff', // Select text color
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                    '.MuiSvgIcon-root': {
+                      color: '#ffffff', // Dropdown arrow color
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#333333', // Dropdown menu background
+                        color: '#ffffff', // Dropdown menu text color
+                      },
+                    },
+                  }}
                 >
                   <FormControlLabel value="yes" control={<Radio />} label="Yes" />
                   <FormControlLabel value="No" control={<Radio />} label="No" />
@@ -468,12 +707,38 @@ const GuestRegistration = ({ setSelectedView }) => {
 
             <div className="intern_reg_form_group">
               <FormControl component="fieldset">
-                <FormLabel component="legend" required>Mega Drive Status</FormLabel>
+                <FormLabel component="legend" required style={{color:"white"}}>Mega Drive Status</FormLabel>
                 <Field
                   as={RadioGroup}
                   name="megadriveStatus"
                   row
                   required
+                  sx={{
+                    color: '#ffffff', // Text color
+                    '.MuiInputBase-input': {
+                      color: '#ffffff', // Select text color
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Default border color
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Hover border color
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#ffffff', // Focused border color
+                    },
+                    '.MuiSvgIcon-root': {
+                      color: '#ffffff', // Dropdown arrow color
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: '#333333', // Dropdown menu background
+                        color: '#ffffff', // Dropdown menu text color
+                      },
+                    },
+                  }}
                 >
                   <FormControlLabel value="yes" control={<Radio />} label="Qualified" />
                   <FormControlLabel value="No" control={<Radio />} label="Not Qualified" />
@@ -505,4 +770,5 @@ const GuestRegistration = ({ setSelectedView }) => {
 };
 
 export default GuestRegistration;
+
 

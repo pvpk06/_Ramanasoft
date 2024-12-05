@@ -130,8 +130,8 @@ const HrJobDesc = ({ jobId }) => {
     },
     { Header: 'Contact Number', accessor: 'mobileNo' },
     { Header: 'Email', accessor: 'email' },
-    { Header: 'Job Role', accessor: 'jobRole' },
-    { Header: 'Company Name', accessor: 'companyName' },
+    { Header: 'Degree', accessor: 'degree' },
+    { Header: 'Branch', accessor: 'branch' },
     {
       Header: 'Status',
       accessor: 'status',
@@ -152,40 +152,113 @@ const HrJobDesc = ({ jobId }) => {
 
   const memoData = useMemo(() => data, [data]);
 
-  const downloadExcel = (completeData = false) => {
+  // const downloadExcel = (completeData = false) => {
 
+  //   const dataToExport = completeData ? memoData : page;
+  //   console.log("Memo:", memoData);
+  //   console.log("Page data:", page)
+  //   // Map the data to include only the necessary columns
+  //   const exportData = dataToExport.map(row => {
+  //     const rowData = {};
+  //     memoColumns.forEach(column => {
+  //       if (column.accessor !== 'resume' && column.accessor !== 'selection') {
+  //         // Safely access row.original or row.values based on the structure
+  //         rowData[column.Header] = row.original
+  //           ? row.original[column.accessor] // Use row.original if available
+  //           : row[column.accessor] || ''; // Fallback to row[column.accessor]
+  //       }
+  //     });
+
+  //     return rowData;
+  //   });
+
+  //   console.log("Exported", exportData); // Debugging: Check the mapped data
+
+
+  //   const worksheet = XLSX.utils.json_to_sheet(exportData);
+  //   const workbook = XLSX.utils.book_new();
+
+
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, 'Job Applications');
+
+  //   const fileName = `JobApplications${completeData ? '_Complete' : ''}.xlsx`;
+
+  //   XLSX.writeFile(workbook, fileName);
+
+  // };
+
+  // const downloadExcel = (completeData = false) => {
+  //   const dataToExport = completeData ? memoData : page;
+
+  //   // Map the data to include resume link
+  //   const exportData = dataToExport.map(row => {
+  //     const rowData = {};
+  //     memoColumns.forEach(column => {
+  //       if (column.accessor !== 'resume' && column.accessor !== 'selection') {
+  //         // Safely access row.original or row.values based on the structure
+  //         rowData[column.Header] = row.original
+  //           ? row.original[column.accessor]
+  //           : row[column.accessor] || '';
+  //       }
+  //     });
+
+  //     // Add resume download link
+  //     rowData['Resume Download'] = `http://localhost:5000/api/download-resume/${row.original.applicationID}`;
+
+  //     return rowData;
+  //   });
+
+  //   const worksheet = XLSX.utils.json_to_sheet(exportData);
+  //   const workbook = XLSX.utils.book_new();
+
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, 'Job Applications');
+
+  //   const fileName = `JobApplications${completeData ? '_Complete' : ''}.xlsx`;
+
+  //   XLSX.writeFile(workbook, fileName);
+  // };
+
+
+  const downloadExcel = (completeData = false) => {
     const dataToExport = completeData ? memoData : page;
-    console.log("Memo:", memoData);
-    console.log("Page data:", page)
-    // Map the data to include only the necessary columns
+  
+    // Map the data to include a hyperlink for the resume
     const exportData = dataToExport.map(row => {
       const rowData = {};
       memoColumns.forEach(column => {
         if (column.accessor !== 'resume' && column.accessor !== 'selection') {
           // Safely access row.original or row.values based on the structure
           rowData[column.Header] = row.original
-            ? row.original[column.accessor] // Use row.original if available
-            : row[column.accessor] || ''; // Fallback to row[column.accessor]
+            ? row.original[column.accessor]
+            : row[column.accessor] || '';
         }
       });
-
+  
+      // Add resume hyperlink
+      const resumeLink = `https://backend.ramanasoft.com:5000/api/download-resume/${row.original.applicationID}`;
+      rowData['Resume Download'] = { f: `HYPERLINK("${resumeLink}", "Download")` }; // Add as a hyperlink
+  
       return rowData;
     });
-
-    console.log("Exported", exportData); // Debugging: Check the mapped data
-
-
+  
     const worksheet = XLSX.utils.json_to_sheet(exportData);
+  
+    // Process hyperlinks correctly for Excel
+    Object.keys(worksheet).forEach(cell => {
+      const cellValue = worksheet[cell].v;
+      if (typeof cellValue === 'object' && cellValue.f) {
+        worksheet[cell].f = cellValue.f; // Set hyperlink formula
+        worksheet[cell].v = undefined; // Remove raw value
+      }
+    });
+  
     const workbook = XLSX.utils.book_new();
-
-
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Job Applications');
-
+  
     const fileName = `JobApplications${completeData ? '_Complete' : ''}.xlsx`;
-
     XLSX.writeFile(workbook, fileName);
-
   };
+  
 
 
   const handleResumeDownload = async (applicationId) => {
@@ -333,8 +406,9 @@ const HrJobDesc = ({ jobId }) => {
         <p><strong>Experience :</strong> {job.jobExperience}</p>
         <p><strong>Qualification :</strong>{job.jobQualification}</p>
         <p><strong>Salary :</strong> {job.salary}</p>
-        <p><strong>Description :</strong> {job.jobDescription}</p>
 
+        <p><strong>Description :</strong> {job.jobDescription}</p>
+        <p><strong>Domains :</strong> {job.domains?.length ? job.domains.join(', ') : 'Not specified'}</p>
         <p><strong>Bond :</strong> {job.bond}</p>
         <p><strong>Available job openings :</strong> {job.openings}</p>
 
@@ -403,10 +477,7 @@ const HrJobDesc = ({ jobId }) => {
             <Button onClick={() => downloadExcel(false)} style={{ height: '40px', marginRight: '10px', backgroundColor: '#6cde37', border: 'none', borderRadius: '5px', color: '#ffffff', fontWeight: 'bold', marginBottom: '5px' }}>
               Download Current Page as Excel
             </Button>
-            <Button onClick={() => downloadExcel(true)} style={{ height: '40px', backgroundColor: '#37a6de', marginRight: '10px', border: 'none', borderRadius: '5px', color: '#ffffff', fontWeight: 'bold', marginBottom: '5px' }}>
-              Download Complete Data as Excel
-            </Button>
-          </Col>
+             </Col>
           <Col md={6} xs={8} lg={4} className="d-flex justify-content-end">
 
             <select onChange={(e) => updateStatus(selectedIds, e.target.value)} className='me-2' style={{ height: '35px', fontSize: '13px', border: '1px solid #737478', outline: 'none', borderRadius: '2px' }}>
@@ -491,11 +562,7 @@ const HrJobDesc = ({ jobId }) => {
     </div>
   );
 
-
-
-
-
-
 };
 
 export default HrJobDesc;
+

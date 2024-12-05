@@ -11,48 +11,47 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const validationSchema = Yup.object({
   fullName: Yup.string()
-    .required('Full Name is required')
-    .matches(/^[A-Za-z ]*$/, 'Only alphabets are allowed for this field'),
+  .required('Full Name is required')
+  .matches(/^[A-Za-z ]*$/, 'Only alphabets are allowed for this field'),
   email: Yup.string()
-    .email('Invalid email format').required('Email is required'),
+  .email('Invalid email format').required('Email is required'),
   mobileNo: Yup.string()
-    .required('Mobile No is required')
-    .matches(/^[6-9][0-9]{9}$/, 'Mobile number must start with 6,7,8,9 and contain exactly 10 digits'),
+  .required('Mobile No is required')
+  .matches(/^[6-9][0-9]{9}$/, 'Mobile number must start with 6,7,8,9 and contain exactly 10 digits')  ,
   dob: Yup.date().required('Date of Birth is required'),
   address: Yup.string()
-    .required('Address is required')
-    .min(10, 'Address must be at least 10 characters long')
-    .max(100, 'Address cannot be longer than 100 characters'),
+  .required('Address is required')
+  .min(10, 'Address must be at least 10 characters long')
+  .max(100, 'Address cannot be longer than 100 characters'),
   workEmail: Yup.string().email('Invalid  email format').required('Work Email is required'),
   workMobile: Yup.string()
-    .required('Work Mobile is required')
-    .matches(/^[6-9][0-9]{9}$/, 'Mobile number must start with 6,7,8,9 and contain exactly 10 digits'),
+  .required('Work Mobile is required')
+  .matches(/^[6-9][0-9]{9}$/, 'Mobile number must start with 6,7,8,9 and contain exactly 10 digits'),
   emergencyContactName: Yup.string()
-    .required('Emergency Contact Name is required')
-    .matches(/^[A-Za-z ]*$/, 'Only alphabets are allowed for this field'),
+  .required('Emergency Contact Name is required')
+  .matches(/^[A-Za-z ]*$/, 'Only alphabets are allowed for this field'),
 
   emergencyContactAddress: Yup.string()
-    .required('Address is required')
-    .min(10, 'Address must be at least 10 characters long')
-    .max(100, 'Address cannot be longer than 100 characters'),
+  .required('Address is required')
+  .min(10, 'Address must be at least 10 characters long')
+  .max(100, 'Address cannot be longer than 100 characters'),
 
   emergencyContactMobile: Yup.string()
-    .required('Emergency Contact Mobile is required')
-    .matches(/^[6-9][0-9]{9}$/, 'Mobile number must start with 6,7,8,9 and contain exactly 10 digits'),
+  .required('Emergency Contact Mobile is required')
+  .matches(/^[6-9][0-9]{9}$/, 'Mobile number must start with 6,7,8,9 and contain exactly 10 digits')  ,
 
   gender: Yup.string().required('Gender is required'),
   branch: Yup.string()
-    .required('Branch is required')
-    .matches(/^[A-Za-z ]*$/, 'Only alphabets are allowed for this field'),
+  .required('Branch is required')
+  .matches(/^[A-Za-z ]*$/, 'Only alphabets are allowed for this field'),
 
   password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required')
 });
 
 const ProfilePage = () => {
-
   const HRid = Cookies.get('HRid');
   const [profile, setProfile] = useState({
-    HRID: '',
+    HRID : '',
     fullName: '',
     email: '',
     mobileNo: '',
@@ -74,14 +73,14 @@ const ProfilePage = () => {
     const fetchHRData = async () => {
       try {
         const response = await apiService.get(`/api/hr-profile/${HRid}`);
+        console.log(response.data);
         setProfile(response.data);
       } catch (error) {
         toast.error('Error fetching profile data');
-        console.error("Fetch error: ", error);
       }
     };
     fetchHRData();
-  }, [HRid]);
+  }, []);
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
@@ -89,23 +88,21 @@ const ProfilePage = () => {
       toast.success('Profile updated successfully');
       setProfile(values);
       setIsEditing(false);
-    } catch (error) {
+    } catch (err) {
       toast.error('Error updating profile');
-      console.error("Submit error: ", error);
     } finally {
       setSubmitting(false);
     }
   };
 
-
   return (
     <div style={{ overflow: 'hidden', fontFamily: 'Arial, sans-serif' }}>
       <Container className="bg-light" style={{ width: '80%', overflow: 'auto', marginTop: '30px', marginBottom: '30px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', borderRadius: '8px' }}>
         <div className="py-4">
-          <span style={{ display: "flex", justifyContent: "space-between", width: "90%" }}>
-            <h2>Your Details</h2>
+        <span style={{ display: "flex", justifyContent: "space-between", width: "90%" }}>
+        <h2>Your Details</h2>
             <div>
-              <Button onClick={() => setIsEditing(true)} className="btn btn-primary" style={{ alignItems: "right", backgroundColor: '#007bff', borderColor: '#007bff' }}>
+              <Button onClick={() => setIsEditing(true)} className="btn btn-primary" style={{ alignItems:"right", backgroundColor: '#007bff', borderColor: '#007bff' }}>
                 Edit
               </Button>
             </div>
@@ -306,22 +303,22 @@ const ProfilePage = () => {
               <Table>
                 <TableBody>
                   {Object.keys(profile)
-                    .filter(key => !['id', 'access'].includes(key)) // Exclude 'id' and 'access' fields
+                    .filter(key => !['id','access','password'].includes(key))
                     .map((key) => (
                       <TableRow key={key}>
+                        {/* <TableCell>{key.replace(/([A-Z])/g, ' $1').toUpperCase()}</TableCell> */}
                         <TableCell>{key.toUpperCase()}</TableCell>
                         <TableCell>{profile[key]}</TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
-
               </Table>
             </TableContainer>
 
           )}
         </div>
       </Container>
-      <ToastContainer position="top-right" autoClose={5000} />
+      <ToastContainer position="top-right" autoClose={5000}/>
     </div>
   );
 };

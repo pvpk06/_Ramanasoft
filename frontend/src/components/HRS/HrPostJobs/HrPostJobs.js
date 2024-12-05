@@ -6,6 +6,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Cookies from 'js-cookie';
 import apiService from '../../../apiService';
 import { toast } from 'react-toastify';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import Checkbox from '@mui/material/Checkbox';
+import { CheckBoxOutlineBlank, CheckBox } from '@mui/icons-material';
+
 
 // Validation Schema
 const validationSchema = Yup.object().shape({
@@ -25,6 +30,11 @@ const validationSchema = Yup.object().shape({
 
   requiredSkills: Yup.string().required('Required Skills are required'),
 
+    // Validation for selectedDomains
+    selectedDomains: Yup.array()
+    .min(1, 'At least one domain must be selected')
+    .required('Domains are required'),
+
   jobCity: Yup.string()
     .matches(/^[A-Za-z ]+$/, 'Job City can only contain alphabetic characters')
     .required('Job City is required'),
@@ -42,7 +52,6 @@ const validationSchema = Yup.object().shape({
 
   applicationUrl: Yup.string().url('Invalid URL').required('Application URL is required'),
   openings: Yup.number().typeError('Must be a number'),
-
   bond: Yup.string().required('Bond is required')
 });
 
@@ -55,6 +64,10 @@ const HrPostJobs = () => {
   const [companyDetails, setCompanyDetails] = useState({});
   const [companyId, setCompanyId] = useState(null);
   const today = new Date().toISOString().split('T')[0];
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+
+
   const fetchCompanyNames = async () => {
     try {
       const response = await apiService.get('/api/registered-companies');
@@ -77,6 +90,33 @@ const HrPostJobs = () => {
   useEffect(() => {
     fetchCompanyNames();
   }, []);
+
+  const domainOptions = [
+    { key: "Python Full Stack", value: "Python Full Stack" },
+    { key: "Java Full Stack", value: "Java Full Stack" },
+    { key: "Mern Full Stack", value: "Mern Full Stack" },
+    { key: "Testing Tools", value: "Testing Tools" },
+    { key: "Scrum Master", value: "Scrum Master" },
+    { key: "Business Analyst", value: "Business Analyst" },
+    { key: "Data Science", value: "Data Science" },
+    { key: "Dot Net", value: "Dot Net" },
+    { key: "Cyber Security", value: "Cyber Security" },
+    { key: "Cloud Data Engineer", value: "Cloud Data Engineer" },
+    { key: "DevOps & Cloud Computing", value: "DevOps & Cloud Computing" },
+    { key: "Project Management & Agile", value: "Project Management & Agile" },
+    { key: "SalesForce", value: "SalesForce" },
+    { key: "Medical Coding", value: "Medical Coding" },
+    { key: "Investment Banking", value: "Investment Banking" },
+    { key: "Digital Marketing", value: "Digital Marketing" },
+    { key: "BI Reporting Tools", value: "BI Reporting Tools" },
+    { key: "Microsoft Dynamics", value: "Microsoft Dynamics" },
+    { key: "Service Now", value: "Service Now" },
+  ];
+
+
+  const icon = <CheckBoxOutlineBlank fontSize="small" />;
+  const checkedIcon = <CheckBox fontSize="small" />;
+
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     console.log('Form Values:', values);
@@ -111,6 +151,7 @@ const HrPostJobs = () => {
               companyName: '',
               jobType: '',
               jobCategory: '',
+              selectedDomains: [],
               jobExperience: '',
               jobQualification: '',
               requiredSkills: '',
@@ -184,20 +225,144 @@ const HrPostJobs = () => {
                     <label style={{ color: '#70706e' }} htmlFor="jobCategory">Job Category *</label>
                     <Field name="jobCategory" as="select" required className={`form-control ${touched.jobCategory && errors.jobCategory ? 'is-invalid' : ''}`}>
                       <option value="">Select</option>
-                      {/* <option value="Technical">Technical</option>
-                      <option value="Non-Technical">Non-Technical</option> */}
-                      <option value="Full Stack Python">Full Stack Python</option>
-                      <option value="Full Stack Java">Full Stack Java</option>
-                      <option value="Mern FUll Stack">Mern FUll Stack</option>
-                      <option value="Testing Tools">Testing Tools</option>
-                      <option value="Scrum Master">Scrum Master</option>
-                      <option value="Business Analyst">Business Analyst</option>
-                      <option value="Data Science">Data Science</option>
-                      <option value="Cyber Security">Cyber Security</option>
+
+                      <option value="Technical">Technical</option>
+                      <option value="Non-Technical">Non-Technical</option>
                     </Field>
                     <ErrorMessage name="jobCategory" component="div" className="invalid-feedback" />
                   </Col>
                 </Row>
+
+
+                {/* <Row className="mb-3">
+              <Col>
+                <label style={{ color: '#70706e' }}>Domains *</label>
+                <Autocomplete
+                  multiple
+                  options={domainOptions}
+                  disableCloseOnSelect
+                  value={values.selectedDomains}
+                  onChange={(event, newValue) => setFieldValue("selectedDomains", newValue)}
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props}>
+                      <Checkbox
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                      />
+                      {option}
+                    </li>
+                  )}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      placeholder="Select Domains"
+                      error={!!values.selectedDomains && values.selectedDomains.length === 0}
+                      helperText={
+                        values.selectedDomains && values.selectedDomains.length === 0
+                          ? "At least one domain must be selected"
+                          : ""
+                      }
+                    />
+                  )}
+                />
+                <ErrorMessage
+                  name="selectedDomains"
+                  component="div"
+                  className="invalid-feedback"
+                />
+              </Col>
+            </Row> */}
+                {/* <Row className="mb-3">
+                  <Col>
+                    <label style={{ color: '#70706e' }}>Domains *</label>
+                    <Autocomplete
+                      multiple
+                      options={domainOptions}
+                      getOptionLabel={(option) => option.value}
+                      disableCloseOnSelect
+                      value={domainOptions.filter(option => values.selectedDomains.includes(option.key))}
+                      onChange={(event, newValue) => {
+                        // Store only the `key` values in selectedDomains
+                        const selectedKeys = newValue.map((option) => option.key);
+                        setFieldValue("selectedDomains", selectedKeys);
+                      }}
+                      isOptionEqualToValue={(option, value) => option.key === value.key}
+                      renderOption={(props, option, { selected }) => (
+                        <li {...props}>
+                          <Checkbox
+                            icon={icon}
+                            checkedIcon={checkedIcon}
+                            style={{ marginRight: 8 }}
+                            checked={selected}
+                          />
+                          {option.value}
+                        </li>
+                      )}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select Domains"
+                          error={values.selectedDomains.length === 0}
+                          // helperText={
+                          //   values.selectedDomains && values.selectedDomains.length === 0
+                          //     ? "At least one domain must be selected"
+                          //     : ""
+                          // }
+                        />
+                      )}
+                    />
+                    <ErrorMessage
+                      name="selectedDomains"
+                      component="div"
+                      className="invalid-feedback"
+                    />
+                  </Col>
+                </Row> */}
+<Row className="mb-3">
+  <Col>
+    <label style={{ color: '#70706e' }}>Domains *</label>
+    <Autocomplete
+      multiple
+      options={domainOptions}
+      getOptionLabel={(option) => option.value}
+      disableCloseOnSelect
+      value={domainOptions.filter(option => values.selectedDomains.includes(option.key))}
+      onChange={(event, newValue) => {
+        // Store only the `key` values in selectedDomains
+        const selectedKeys = newValue.map((option) => option.key);
+        setFieldValue("selectedDomains", selectedKeys);
+      }}
+      isOptionEqualToValue={(option, value) => option.key === value.key}
+      renderOption={(props, option, { selected }) => (
+        <li {...props}>
+          <Checkbox
+            icon={icon}
+            checkedIcon={checkedIcon}
+            style={{ marginRight: 8 }}
+            checked={selected}
+          />
+          {option.value}
+        </li>
+      )}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          placeholder="Select Domains"
+          error={touched.selectedDomains && !!errors.selectedDomains} // Show error if touched and invalid
+          helperText={touched.selectedDomains && errors.selectedDomains} // Display error message
+        />
+      )}
+    />
+    <ErrorMessage
+      name="selectedDomains"
+      component="div"
+      className="invalid-feedback"
+    />
+  </Col>
+</Row>
 
                 <Row className="mb-3">
                   <Col>

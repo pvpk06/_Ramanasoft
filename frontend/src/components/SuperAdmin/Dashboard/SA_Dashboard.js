@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet, useParams } from 'react-router-dom';
 import './SA_dashboard.css';
-import RSLogo from './RSLogo.jpeg';
+import RSLogo from './RSLogo.png';
 import Cookies from 'js-cookie';
 import RegistrationRequests from '../Intern_Requests/RegistrationRequests';
 import GuestRegistrationRequests from '../Intern_Requests/guestRequests';
@@ -26,7 +26,9 @@ import StudentsPlaced from '../home/SAStudentsPlaced';
 import SAStudentDetails from '../home/SAStudentData';
 import CompanyData from '../home/CompanyData';
 import PreviewQuiz from '../Quiz/preview/preview';
-
+import HRStats from '../Reports/Reports';
+import StudentJobReport from '../Reports/StudentJobReport';
+import DomainWiseReport from '../Reports/domainwisereport';
 const SADash = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -68,6 +70,16 @@ const SADash = () => {
       ]
     },
     { id: 'quiz', name: 'Quiz', icon: 'fas fa-book' },
+
+    {
+      id: 'reports', name: 'Jobs Reports', icon: 'fas fa-briefcase',
+      submenu: [
+        { id: 'hrJobsReport', name: 'HR Report 01', icon: 'fas fa-plus' },
+        { id: 'hrStudentsReport', name: 'HR Report 02', icon: 'fas fa-eye' },
+        { id: 'domainWiseReport', name: 'Domain Report', icon: 'fas fa-eye' },
+        
+      ]
+    }    
   ];
 
   useEffect(() => {
@@ -223,10 +235,21 @@ const SADash = () => {
         return <JobStatus statusInfo="drive-scheduled" />;
       case "drive-done":
         return <JobStatus statusInfo="drive-done" />;
+      
+      case "offer-received":
+        return <JobStatus statusInfo="offer-received" />;
+      
       case "not-interested":
         return <JobStatus statusInfo="not-interested" />;
       case "preview":
         return <PreviewQuiz />
+      
+      case "hrJobsReport":
+        return <HRStats />
+      case "hrStudentsReport":
+        return <StudentJobReport />
+      case 'domainWiseReport':
+        return <DomainWiseReport />
       default:
         return <HrPortal />;
     }

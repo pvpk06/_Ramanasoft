@@ -7,6 +7,8 @@
 // const session = require('express-session');
 // const nodemailer = require('nodemailer');
 // const pool = require('./db');
+// const db2 = require('./db2');
+
 // const { check, validationResult } = require('express-validator');
 // const app = express();
 // const crypto = require('crypto');
@@ -96,9 +98,6 @@
 //   console.log(`Server running on https://backend.ramanasoft.com:${PORT}`);
 // });
 
-
-
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -184,7 +183,7 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-var server = app.listen(PORT, () => {
+var server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
@@ -209,7 +208,6 @@ const sendEmail = async (email, mailOptions) => {
     from: '"Ramanasoft Team" <noreply@ramanasoft.in>',
     ...mailOptions
   };
-  console.log("email", options)
 
   try {
     await transport.sendMail(options);
@@ -229,7 +227,7 @@ const sendEmail = async (email, mailOptions) => {
 //     port: 587,
 //     auth: {
 //       user: "emailapikey",
-      // pass: "PHtE6r1eROHrjG968hhW7fbuF8LwZoMqru1nfgRG4YxKAqAFSU1QotAjxGfj/hl+VaQWE/aby91ouOmbu+PXJWq+MTlPCGqyqK3sx/VYSPOZsbq6x00cuFgZckHYUYbnc9Bq3CDVud3YNA=="
+// pass: "PHtE6r1eROHrjG968hhW7fbuF8LwZoMqru1nfgRG4YxKAqAFSU1QotAjxGfj/hl+VaQWE/aby91ouOmbu+PXJWq+MTlPCGqyqK3sx/VYSPOZsbq6x00cuFgZckHYUYbnc9Bq3CDVud3YNA=="
 //     }
 //   });
 
@@ -284,7 +282,6 @@ const sendEmail = async (email, mailOptions) => {
 
 app.get('/api/hr-job-applications', async (req, res) => {
   const { companyName, hrId } = req.query;
-  console.log("Company name", companyName, hrId)
   let sql;
   if (companyName == '' || companyName === undefined) {
     sql = `SELECT applied_students.*,
@@ -318,7 +315,6 @@ app.put("/api/applications/:id/status", async (req, res) => {
   console.log(status, id)
   try {
     const result = await query('UPDATE applied_students SET status=? WHERE applicationID=?', [status, id])
-    console.log(result)
     res.status(200).json({ message: "Status Changed Successfully" })
   } catch (err) {
     console.error(err)
@@ -421,7 +417,6 @@ app.get('/api/statistics/:status', async (req, res) => {
     else {
       [result] = await query(`SELECT COUNT(*) as count FROM applied_students WHERE status='${status}'`)
     }
-    console.log(result.count)
 
     res.status(200).json(result);
   } catch (err) {
@@ -451,9 +446,9 @@ app.get('/applications/:jobId', async (req, res) => {
 
 
 app.get('/api/applications/:jobId', async (req, res) => {
+
   const { jobId } = req.params;
   const sql = `SELECT * FROM applied_students where jobId='${jobId}'`;
-  console.log(sql);
   try {
     const rows = await query(sql);
 
@@ -752,16 +747,20 @@ app.post('/api/add/hr', async (req, res) => {
     let lastHRIdNumber = lastHR ? parseInt(lastHR.HRid.split('-')[1]) : 0;
     lastHRIdNumber++;
     const newHRId = `RSHR-${String(lastHRIdNumber).padStart(2, '0')}`;
-
+    const access = ["home", "profile"];
+        
+    // Ensure the access array is stored as a JSON string
+    const accessJson = JSON.stringify(access);
+    
     // Insert new HR data
     const sql = `INSERT INTO hr_data (
       HRid, fullName, email, mobileNo, dob, address, workEmail, workMobile,
-      emergencyContactName, emergencyContactAddress, emergencyContactMobile, gender, branch, password
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      emergencyContactName, emergencyContactAddress, emergencyContactMobile, gender, branch, password, access
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     await query(sql, [
       newHRId, fullName, email, contactNo, dob, address, workEmail, workMobile,
-      emergencyContactName, emergencyContactAddress, emergencyContactMobile, gender, branch, password
+      emergencyContactName, emergencyContactAddress, emergencyContactMobile, gender, branch, password, accessJson
     ]);
 
     res.status(200).json({ message: 'HR registration successful' });
@@ -873,7 +872,12 @@ app.post("/api/accept-hrs", async (req, res) => {
         lastHRIdNumber++;
         const newHRId = `RSHR-${String(lastHRIdNumber).padStart(2, '0')}`;
         const password = "password123";
-        await query('INSERT INTO hr_data (HRid, fullName, email, mobileNo, dob, address, workEmail, workMobile, emergencyContactName, emergencyContactAddress, emergencyContactMobile, gender, branch, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+        const access = ["home", "profile"];
+        
+        // Ensure the access array is stored as a JSON string
+        const accessJson = JSON.stringify(access);
+        console.log(accessJson);
+        await query('INSERT INTO hr_data (HRid, fullName, email, mobileNo, dob, address, workEmail, workMobile, emergencyContactName, emergencyContactAddress, emergencyContactMobile, gender, branch, password, access) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
           newHRId,
           hr.fullName,
           hr.email,
@@ -887,10 +891,12 @@ app.post("/api/accept-hrs", async (req, res) => {
           hr.emergencyContactMobile,
           hr.gender,
           hr.branch,
-          password
+          password,
+          accessJson  // Insert the JSON string version of the access array
         ]);
+        
         acceptedHRs.push({ ...hr, HRid: newHRId });
-      }
+              }
     }
     const processedHRs = [...acceptedHRs];
     if (processedHRs.length > 0) {
@@ -899,12 +905,51 @@ app.post("/api/accept-hrs", async (req, res) => {
       ]);
     }
 
-    const mailOptions = {
-      subject: 'Registration Success',
-      text: `Your request is approved`,
-    };
-    const emailPromises = acceptedHRs.map(hr => sendEmail(hr.email, mailOptions));
-    await Promise.all(emailPromises);
+    // Send emails to all registered interns
+    try {
+      const emailPromises = acceptedHRs.map(hr => {
+        const mailOptions = {
+          subject: 'Welcome to RamanaSoft',
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+              <div style="background-color: #0a1b3d; padding: 20px; text-align: center;">
+                <h1 style="color: #fff; margin: 0;">Welcome To RamanaSoft Consultancy Services</h1>
+              </div>
+              <div style="padding: 20px;">
+                <p>Here are your account details,</p>
+                <p><strong>Your HRID :</strong> ${hr.HRid}</p>
+                <p><strong>Name:</strong> ${hr.fullName}</p>
+                <p><strong>Email:</strong> ${hr.email}</p>
+                <p><strong>Mobile:</strong> ${hr.contactNo}</p>
+                <p><strong>Work Email:</strong> ${hr.workEmail}</p>
+                <p><strong>Work Mobile:</strong> ${hr.workMobile}</p> 
+
+                <p> Proceed Login Here, "https://ramanasoft.com/login/hr" </p>
+                <p>Below are your credentials, </p>
+                <p>Your login email is work email </p>
+                <p>Your current password is "password123" </p>
+                <p>Consider Updating your password after logging in.</p>
+                <p>Best Regards,<br>Team RamanaSoft.</p>
+              </div>
+              <div style="background-color: #f5f5f5; padding: 10px; text-align: center; font-size: 12px;">
+                <p>&copy; 2024 RamanaSoft. All rights reserved.</p>
+                <p>Contact us at <a href="mailto:support@ramanasoft.com" style="color: #0a1b3d;">support@ramanasoft.com</a></p>
+              </div>
+            </div>
+          `
+        };
+        return sendEmail(hr.email, mailOptions);
+      });
+
+      await Promise.all(emailPromises);
+
+
+    } catch (emailError) {
+      console.error('Error sending emails:', emailError);
+      res.status(207).json({
+        emailError
+      });
+    }
 
     res.status(200).json({ accepted: acceptedHRs, rejected: rejectedHRs });
   } catch (error) {
@@ -932,7 +977,7 @@ app.post("/api/reject-hrs", async (req, res) => {
     if (result.affectedRows === requestIDs.length) {
       res.status(200).json({ message: 'All hrs rejected successfully' });
     } else if (result.affectedRows > 0) {
-      res.status(200).json({ message: `Rejected ${result.affectedRows} out of ${requestIDs.length} interns` });
+      res.status(200).json({ message: `Rejected ${result.affectedRows} out of ${requestIDs.length} hrs` });
     } else {
       res.status(500).json({ message: 'No documents matched the query' });
     }
@@ -992,6 +1037,43 @@ app.post("/api/reject-hrs", async (req, res) => {
 // });
 
 
+// app.post('/api/hr-login', [
+//   check('email', 'Email is required').isEmail(),
+//   check('password', 'Password is required').not().isEmpty()
+// ], async (req, res) => {
+//   const { email, password } = req.body;
+//   console.log(email, password);
+
+//   // Validate input
+//   const errors = validationResult(req);
+//   console.log("Errors", errors);
+//   if (!errors.isEmpty()) {
+//     return res.status(400).json({ errors: errors.array() });
+//   }
+
+//   try {
+//     // Check if the email exists
+//     const emailExists = await query('SELECT * FROM hr_data WHERE workEmail = ?', [email]);
+//     if (emailExists.length < 1) {
+//       return res.status(404).json({ message: 'User Not Found' }); // 404 for not found
+//     }
+
+//     // Check if the email and password match
+//     const row = await query('SELECT * FROM hr_data WHERE workEmail = ? AND password = ?', [email, password]);
+//     if (row.length > 0) {
+//       const user = row[0];
+//       console.log(user.fullName, "Logged in successfully");
+//       return res.status(200).json({ message: 'Logged in successfully', HRid: user.HRid, name: user.fullName }); // 200 for success
+//     } else {
+//       return res.status(401).json({ message: 'Invalid credentials' }); // 401 for unauthorized
+//     }
+//   } catch (err) {
+//     console.error('Server error:', err);
+//     return res.status(500).json({ message: 'Server error' }); // 500 for server error
+//   }
+// });
+
+
 app.post('/api/hr-login', [
   check('email', 'Email is required').isEmail(),
   check('password', 'Password is required').not().isEmpty()
@@ -1013,10 +1095,16 @@ app.post('/api/hr-login', [
       return res.status(404).json({ message: 'User Not Found' }); // 404 for not found
     }
 
+    const user = emailExists[0];
+
+    // Check if the profile is blocked
+    if (user.blockProfile) { // Assuming `blockProfile` is stored as a boolean in the database
+      return res.status(405).json({ message: 'Your profile is blocked! Contact Admin.' }); // 405 for profile blocked
+    }
+
     // Check if the email and password match
     const row = await query('SELECT * FROM hr_data WHERE workEmail = ? AND password = ?', [email, password]);
     if (row.length > 0) {
-      const user = row[0];
       console.log(user.fullName, "Logged in successfully");
       return res.status(200).json({ message: 'Logged in successfully', HRid: user.HRid, name: user.fullName }); // 200 for success
     } else {
@@ -1028,10 +1116,11 @@ app.post('/api/hr-login', [
   }
 });
 
+
 //Super admin api to delete hr
 app.delete('/api/delete_hr/:id', async (req, res) => {
   const hrId = req.params.id;
-
+  console.log(hrId);
   try {
     const result = await query('DELETE FROM hr_data WHERE HRid = ?', [hrId]);
 
@@ -1077,36 +1166,78 @@ app.post('/api/SAlogin', [
 
 
 
+// app.post("/api/post-job", async (req, res) => {
+//   const { job, hrId, companyId } = req.body;
+//   console.log(req.body);
+//   try {
+//     const lastDate = new Date(job.lastDate).toISOString().slice(0, 10); // This will format the date as YYYY-MM-DD
+
+//     const rows = await query(`
+//   SELECT * FROM jobs WHERE companyName = ? AND Location = ? AND jobCategory = ? AND jobExperience = ? AND jobQualification = ? AND email = ? AND phone = ? AND lastDate = ? AND jobDescription = ? AND salary = ? AND applicationUrl = ? AND requiredSkills = ? AND jobType = ? AND jobTitle = ? AND postedBy = ?`,
+//       [
+//         job.companyName, job.jobCity, job.jobCategory,
+//         job.jobExperience, job.jobQualification, job.email, job.phone, lastDate,
+//         job.jobDescription, job.salary, job.applicationUrl,
+//         job.requiredSkills, job.jobType, job.jobTitle, hrId
+//       ]);
+
+//     if (rows.length > 0) {
+//       return res.status(400).json({ message: 'Duplicate job entry detected, job not posted.' });
+//     }
+
+//     await query(`
+//   INSERT INTO jobs (companyName, Location, jobCategory, jobExperience, jobQualification, email, phone, postedOn, lastDate, jobDescription, salary, applicationUrl, requiredSkills, jobType, jobTitle, postedBy,status,companyID, openings, bond)
+//   VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?,'jd-received',?, ?, ?)`,
+//       [
+//         job.companyName, job.jobCity, job.jobCategory,
+//         job.jobExperience, job.jobQualification, job.email, job.phone, lastDate,
+//         job.jobDescription, job.salary, job.applicationUrl,
+//         job.requiredSkills, job.jobType, job.jobTitle, hrId, companyId, job.openings, job.bond
+//       ]);
+
+//     res.status(201).json({ message: 'Job posted successfully' });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server Error' });
+//   }
+// });
+
+//Updating existing posted job data for SA and HR
+
+
 app.post("/api/post-job", async (req, res) => {
   const { job, hrId, companyId } = req.body;
   console.log(req.body);
   try {
-    // Convert lastDate to the proper format (YYYY-MM-DD)
-    const lastDate = new Date(job.lastDate).toISOString().slice(0, 10); // This will format the date as YYYY-MM-DD
+    const lastDate = new Date(job.lastDate).toISOString().slice(0, 10); // Format the date as YYYY-MM-DD
 
-    // Check for duplicate job entries
+    // Duplicate check including domains as JSON
     const rows = await query(`
-  SELECT * FROM jobs WHERE companyName = ? AND Location = ? AND jobCategory = ? AND jobExperience = ? AND jobQualification = ? AND email = ? AND phone = ? AND lastDate = ? AND jobDescription = ? AND salary = ? AND applicationUrl = ? AND requiredSkills = ? AND jobType = ? AND jobTitle = ? AND postedBy = ?`,
+      SELECT * FROM jobs WHERE companyName = ? AND Location = ? AND jobCategory = ? AND jobExperience = ? 
+      AND jobQualification = ? AND email = ? AND phone = ? AND lastDate = ? AND jobDescription = ? 
+      AND salary = ? AND applicationUrl = ? AND requiredSkills = ? AND jobType = ? AND jobTitle = ? 
+      AND postedBy = ? AND domains = ?`,
       [
-        job.companyName, job.jobCity, job.jobCategory,
-        job.jobExperience, job.jobQualification, job.email, job.phone, lastDate,
-        job.jobDescription, job.salary, job.applicationUrl,
-        job.requiredSkills, job.jobType, job.jobTitle, hrId
+        job.companyName, job.jobCity, job.jobCategory, job.jobExperience, job.jobQualification,
+        job.email, job.phone, lastDate, job.jobDescription, job.salary, job.applicationUrl,
+        job.requiredSkills, job.jobType, job.jobTitle, hrId, JSON.stringify(job.selectedDomains)
       ]);
 
     if (rows.length > 0) {
       return res.status(400).json({ message: 'Duplicate job entry detected, job not posted.' });
     }
 
-    // Insert the job into the database
+    // Insert job with domains as JSON
     await query(`
-  INSERT INTO jobs (companyName, Location, jobCategory, jobExperience, jobQualification, email, phone, postedOn, lastDate, jobDescription, salary, applicationUrl, requiredSkills, jobType, jobTitle, postedBy,status,companyID, openings, bond)
-  VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?,'jd-received',?, ?, ?)`,
+      INSERT INTO jobs (companyName, Location, jobCategory, jobExperience, jobQualification, email, phone, 
+      postedOn, lastDate, jobDescription, salary, applicationUrl, requiredSkills, jobType, jobTitle, 
+      postedBy, status, companyID, openings, bond, domains)
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 'jd-received', ?, ?, ?, ?)`,
       [
-        job.companyName, job.jobCity, job.jobCategory,
-        job.jobExperience, job.jobQualification, job.email, job.phone, lastDate,
-        job.jobDescription, job.salary, job.applicationUrl,
-        job.requiredSkills, job.jobType, job.jobTitle, hrId, companyId, job.openings, job.bond
+        job.companyName, job.jobCity, job.jobCategory, job.jobExperience, job.jobQualification,
+        job.email, job.phone, lastDate, job.jobDescription, job.salary, job.applicationUrl,
+        job.requiredSkills, job.jobType, job.jobTitle, hrId, companyId, job.openings, job.bond,
+        JSON.stringify(job.selectedDomains)
       ]);
 
     res.status(201).json({ message: 'Job posted successfully' });
@@ -1116,35 +1247,9 @@ app.post("/api/post-job", async (req, res) => {
   }
 });
 
-//Updating existing posted job data for SA and HR
-app.post("/api/update-job", async (req, res) => {
-  const { jobId, changedValues } = req.body;
-  console.log(jobId);
-  console.log(changedValues);
-  console.log("req:", req.body);
 
-  try {
-    const setPart = Object.keys(changedValues)
-      .map(key => `${key} = ?`)
-      .join(", ");
 
-    const values = [...Object.values(changedValues), jobId];
 
-    const result = await query(
-      `UPDATE jobs SET ${setPart} WHERE jobId = ?`,
-      values
-    );
-
-    if (result.affectedRows === 1) {
-      return res.status(200).json({ message: 'Job updated successfully' });
-    } else {
-      return res.status(400).json({ error: "Job not updated" });
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
 
 
 //intern requests for both SA and HR
@@ -1217,7 +1322,6 @@ app.get("/api/view-jobs", async (req, res) => {
   }
 });
 
-//View jobs for Intern
 // app.get("/api/intern-view-jobs/:id", async (req, res) => {
 //   const candidateId = req.params.id;
 //   console.log("intern id :", candidateId);
@@ -1248,22 +1352,66 @@ app.get("/api/view-jobs", async (req, res) => {
 //     res.status(500).json({ message: "Server error" });
 //   }
 // });
+
+
 app.get("/api/intern-view-jobs/:id", async (req, res) => {
   const candidateId = req.params.id;
+  console.log("intern id :", candidateId);
+
   try {
+    let studentDomainResult = null; // Declare as null to later check for existence
+    const internDomainResult = await query(`SELECT domain FROM intern_data WHERE candidateID = ?`, [candidateId]);
+
+    if (internDomainResult && internDomainResult.length > 0 && internDomainResult[0].domain) {
+      studentDomainResult = internDomainResult[0]; // Assign the domain if found
+    } else {
+      // If no domain found, you can handle guestDomainResult differently
+      const guestDomainResult = await query(`SELECT domain FROM guest_data WHERE guestID = ?`, [candidateId]);
+      studentDomainResult = guestDomainResult.length > 0 ? guestDomainResult[0] : null; // Assign guest domain if available
+    }
+
+    if (!studentDomainResult || !studentDomainResult.domain) {
+      return res.status(404).json({ message: "Intern not found or no domain available" });
+    }
+
+    const internDomain = studentDomainResult.domain;
+    console.log("internDomain :", internDomain);
+
     const date = new Date();
     const jobs = await query(`
-  SELECT * FROM jobs
-  WHERE lastDate > ?
-  AND jobId NOT IN (
-  SELECT jobID FROM applied_students WHERE candidateID = ?
-  )
-  `, [date, candidateId]);
+      SELECT * FROM jobs 
+      WHERE lastDate > ? 
+      AND JSON_CONTAINS(domains, JSON_QUOTE(?), '$') 
+      AND jobId NOT IN (
+        SELECT jobID FROM applied_students WHERE candidateID = ?
+      )
+    `, [date, internDomain, candidateId]);
+
+    console.log("jobs :", jobs);
     res.status(200).json(jobs);
   } catch (err) {
+    console.error("Error fetching jobs:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+// app.get("/api/intern-view-jobs/:id", async (req, res) => {
+//   const candidateId = req.params.id;
+//   try {
+//     const date = new Date();
+//     const jobs = await query(`
+//   SELECT * FROM jobs
+//   WHERE lastDate > ?
+//   AND jobId NOT IN (
+//   SELECT jobID FROM applied_students WHERE candidateID = ?
+//   )
+//   `, [date, candidateId]);
+//     res.status(200).json(jobs);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
 
 
 // //Api for view job applications for Interns
@@ -1397,41 +1545,106 @@ app.get('/api/guest-applied-jobs/:id', async (req, res) => {
 // });
 
 //Common Login API
-app.post("/api/normal-login", [check('mobileNo', 'Mobile number is required').not().isEmpty()], async (request, res) => {
-  const { mobileNo } = request.body;
-  console.log("mobile Num:" + mobileNo)
+// app.post("/api/normal-login", [check('mobileNo', 'Mobile number is required').not().isEmpty()], async (request, res) => {
+//   const { mobileNo } = request.body;
+//   console.log("mobile Num:" + mobileNo)
 
-  try {
-    const isIntern = await query('SELECT * FROM intern_data WHERE mobileNo = ?', [mobileNo])
-    const isGuest = await query("SELECT * FROM guest_data WHERE mobileNo = ?", [mobileNo])
-    // console.log(isIntern)
-    // console.log(isGuest)
+//   try {
+//     const isIntern = await query('SELECT * FROM intern_data WHERE mobileNo = ?', [mobileNo])
+//     const isGuest = await query("SELECT * FROM guest_data WHERE mobileNo = ?", [mobileNo])
+//     // console.log(isIntern)
+//     // console.log(isGuest)
 
-    if (isIntern.length > 0) {
-      const intern = isIntern[0];
-      console.log(intern);
-      res.cookie('internID', intern.candidateID, { httpOnly: true, secure: true, maxAge: 30 * 24 * 60 * 60 * 1000 });
-      return res.status(200).json({ message: 'Login successful!', intern, type: "intern" }); // 200 for success
+//     if (isIntern.length > 0) {
+//       const intern = isIntern[0];
+//       console.log(intern);
+//       res.cookie('internID', intern.candidateID, { httpOnly: true, secure: true, maxAge: 30 * 24 * 60 * 60 * 1000 });
+//       return res.status(200).json({ message: 'Login successful!', intern, type: "intern" }); // 200 for success
 
+//     }
+//     else if (isGuest.length > 0) {
+//       const intern = isGuest[0];
+//       console.log(intern);
+//       res.cookie('internID', intern.guestID, { httpOnly: true, secure: true, maxAge: 30 * 24 * 60 * 60 * 1000 });
+//       return res.status(200).json({ message: 'Login Successful!', intern, type: "guest" }); // 200 for success
+
+//     }
+//     else {
+//       console.log("User is not registered")
+//       return res.status(400).json({ message: "Please register!" })
+//     }
+
+//   }
+//   catch (error) {
+//     console.log("catch error:" + error)
+//     return response.status(500).json({ message: "Internal server error at nomal login" })
+//   }
+// });
+app.post("/api/normal-login",
+  [check('mobileNo', 'Mobile number is required').not().isEmpty()],
+  async (request, res) => {
+    const { mobileNo } = request.body;
+    console.log("Mobile Num: " + mobileNo);
+
+    try {
+      // Check if the user is an intern or a guest
+      const isIntern = await query('SELECT * FROM intern_data WHERE mobileNo = ?', [mobileNo]);
+      const isGuest = await query('SELECT * FROM guest_data WHERE mobileNo = ?', [mobileNo]);
+
+      if (isIntern.length > 0) {
+        const intern = isIntern[0];
+        console.log("Intern data:", intern);
+
+        // Check if the intern is blocked
+        if (intern.blockProfile) {
+          console.log("Blocked Intern");
+          return res.status(403).json({ message: "Your profile is blocked. Please contact support." }); // 403 Forbidden
+        }
+
+        res.cookie('internID', intern.candidateID, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+        return res.status(200).json({
+          message: 'Login successful!',
+          intern,
+          type: "intern"
+        }); // 200 for success
+      }
+
+      if (isGuest.length > 0) {
+        const guest = isGuest[0];
+        console.log("Guest data:", guest);
+
+        // Check if the guest is blocked
+        if (guest.blockProfile) {
+          console.log("Blocked Guest");
+          return res.status(403).json({ message: "Your profile is blocked. Please contact support." }); // 403 Forbidden
+        }
+
+        res.cookie('internID', guest.guestID, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+        return res.status(200).json({
+          message: 'Login Successful!',
+          intern: guest,
+          type: "guest"
+        }); // 200 for success
+      }
+
+      // If no user is found
+      console.log("User is not registered");
+      return res.status(400).json({ message: "Please register!" });
+    } catch (error) {
+      console.error("Catch error:", error);
+      return res.status(500).json({ message: "Internal server error at normal login" });
     }
-    else if (isGuest.length > 0) {
-      const intern = isGuest[0];
-      console.log(intern);
-      res.cookie('internID', intern.guestID, { httpOnly: true, secure: true, maxAge: 30 * 24 * 60 * 60 * 1000 });
-      return res.status(200).json({ message: 'Login Successful!', intern, type: "guest" }); // 200 for success
-
-    }
-    else {
-      console.log("User is not registered")
-      return res.status(400).json({ message: "Please register!" })
-    }
-
   }
-  catch (error) {
-    console.log("catch error:" + error)
-    return response.status(500).json({ message: "Internal server error at nomal login" })
-  }
-});
+);
+
 
 //Students list in SA 
 app.get("/api/intern_data", async (req, res) => {
@@ -1599,6 +1812,50 @@ app.put('/api/intern_data/:candidateID', async (req, res) => {
   }
 });
 
+
+
+app.put('/api/guest_data/:candidateID', async (req, res) => {
+  const { candidateID } = req.params;
+  console.log(req.params, req.body);
+  const {
+    fullName, email, mobileno, altmobileno, domain,
+    BelongedToVasaviFoundation, address, batchno,
+    modeOfTraining, profile_img
+  } = req.body;
+
+  try {
+    // Your existing duplicate check code...
+
+    const updateQuery = `
+          UPDATE guest_data
+          SET
+              fullName = ?,
+              email = ?,
+              mobileno = ?,
+              altmobileno = ?,
+              domain = ?,
+              BelongedToVasaviFoundation = ?,
+              address = ?,
+              batchno = ?,
+              modeOfTraining = ?,
+              profile_img = ?
+          WHERE guestID = ?;
+      `;
+
+    await query(updateQuery, [
+      fullName, email, mobileno, altmobileno, domain,
+      BelongedToVasaviFoundation, address, batchno,
+      modeOfTraining, profile_img, candidateID
+    ]);
+
+    return res.status(200).json({ message: 'Profile updated successfully' });
+
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 app.delete("/api/intern_data/:id", async (req, res) => {
   const internID = req.params.id;
   try {
@@ -1731,6 +1988,17 @@ app.get('/api/hr_data/:id', async (req, res) => {
 app.put('/api/hr_data/:id', async (req, res) => {
   const { id } = req.params;
   const updatedHr = req.body;
+
+  // Ensure that the 'access' field is properly handled if it's in the request body
+  if (updatedHr.access) {
+    try {
+      // Parse the access field as a JSON object if it's not already
+      updatedHr.access = JSON.stringify(updatedHr.access);
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid JSON for access field' });
+    }
+  }
+
   try {
     const result = await query('UPDATE hr_data SET ? WHERE HRid = ?', [updatedHr, id]);
 
@@ -1739,7 +2007,7 @@ app.put('/api/hr_data/:id', async (req, res) => {
     }
 
     res.status(200).json({ message: 'HR updated successfully' });
-    console.log(id, "details updated succssfully")
+    console.log(id, "details updated successfully");
   } catch (err) {
     console.error('Database query error:', err);
     res.status(500).json({ message: 'Server error' });
@@ -1882,10 +2150,8 @@ app.put("/api/jobs/status", async (req, res) => {
       const placeholders = ids.map(() => '?').join(',');
       const queryStr = `UPDATE jobs SET status=? WHERE jobId IN (${placeholders})`;
       const result = await query(queryStr, [status, ...ids]);
-      console.log(result);
     } else {
       const result = await query('UPDATE jobs SET status=? WHERE jobId=?', [status, ids]);
-      console.log(result);
     }
 
     res.status(200).json({ message: "Status Changed Successfully" });
@@ -1907,10 +2173,8 @@ app.put("/api/applications/status", async (req, res) => {
       const placeholders = ids.map(() => '?').join(',');
       const queryStr = `UPDATE applied_students SET status=? WHERE applicationID IN (${placeholders})`;
       const result = await query(queryStr, [status, ...ids]);
-      console.log(result);
     } else {
       const result = await query('UPDATE applied_students SET status=? WHERE applicationID=?', [status, ids]);
-      console.log(result);
     }
 
     res.status(200).json({ message: "Status Changed Successfully" });
@@ -1934,7 +2198,6 @@ app.get('/api/applications', async (req, res) => {
 
   try {
     const rows = await query(sql, params);
-    console.log("Rows", rows);
     const response = rows.map(row => ({
       ...row,
     }));
@@ -2157,7 +2420,6 @@ app.get('/api/job-applicants/:status', async (req, res) => {
 
   try {
     const rows = await query(sql, [status.trim()]);
-    console.log(rows);
     const response = rows.map(row => ({
       ...row,
       resume: row.resume ? row.resume.toString('base64') : null
@@ -2171,17 +2433,121 @@ app.get('/api/job-applicants/:status', async (req, res) => {
 });
 
 
+// app.post("/api/update-job", async (req, res) => {
+//   const { jobId, changedValues } = req.body;
+//   console.log(jobId);
+//   console.log(changedValues);
+//   console.log("req:", req.body);
+
+//   try {
+//     const setPart = Object.keys(changedValues)
+//       .map(key => `${key} = ?`)
+//       .join(", ");
+
+//     const values = [...Object.values(changedValues), jobId];
+
+//     const result = await query(
+//       `UPDATE jobs SET ${setPart} WHERE jobId = ?`,
+//       values
+//     );
+
+//     if (result.affectedRows === 1) {
+//       return res.status(200).json({ message: 'Job updated successfully' });
+//     } else {
+//       return res.status(400).json({ error: "Job not updated" });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server Error' });
+//   }
+// });
 //API TO UPDATE JOBS
+// app.post("/api/update-job", async (req, res) => {
+//   const { jobId, changedValues } = req.body;
+//   console.log("req:", req.body);
+
+//   try {
+//     const setPart = Object.keys(changedValues)
+//       .map(key => {
+//         if (key === "domains") {
+//           return `${key} = ?`; // Special handling for domains
+//         }
+//         return `${key} = ?`;
+//       })
+//       .join(", ");
+
+//     const values = Object.keys(changedValues).map(key => {
+//       if (key === "domains") {
+//         // Convert domains array to a JSON string
+//         return JSON.stringify(changedValues[key]);
+//       }
+//       return changedValues[key];
+//     });
+
+//     values.push(jobId); // Add jobId to the values array for the WHERE clause
+
+//     const result = await query(
+//       `UPDATE jobs SET ${setPart} WHERE jobId = ?`,
+//       values
+//     );
+
+//     if (result.affectedRows === 1) {
+//       return res.status(200).json({ message: "Job updated successfully" });
+//     } else {
+//       return res.status(400).json({ error: "Job not updated" });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server Error" });
+//   }
+// });
+
 app.post("/api/update-job", async (req, res) => {
   const { jobId, changedValues } = req.body;
   console.log("req:", req.body);
 
   try {
+    // Step 1: Fetch the current job details from the database
+    const currentJob = await query("SELECT * FROM jobs WHERE jobId = ?", [jobId]);
+    
+    // If the job does not exist, return an error
+    if (!currentJob.length) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    // Step 2: Check if there are any changes
+    const changesDetected = Object.keys(changedValues).some((key) => {
+      if (key === "domains") {
+        // Compare the domains array (stored as JSON) with the changed value
+        return JSON.stringify(currentJob[0][key]) !== JSON.stringify(changedValues[key]);
+      }
+      return currentJob[0][key] !== changedValues[key];
+    });
+
+    // Step 3: If no changes detected, return a message
+    if (!changesDetected) {
+      return res.status(200).json({ message: "No changes detected" });
+    }
+
+    // Step 4: Proceed with the update
     const setPart = Object.keys(changedValues)
-      .map(key => `${key} = ?`)
+      .map(key => {
+        if (key === "domains") {
+          return `${key} = ?`; // Special handling for domains
+        }
+        return `${key} = ?`;
+      })
       .join(", ");
 
-    const values = [...Object.values(changedValues), jobId];
+    const values = Object.keys(changedValues).map(key => {
+      if (key === "domains") {
+        // Convert domains array to a JSON string
+        return JSON.stringify(changedValues[key]);
+      }
+      return changedValues[key];
+    });
+
+    values.push(jobId); // Add jobId to the values array for the WHERE clause
 
     const result = await query(
       `UPDATE jobs SET ${setPart} WHERE jobId = ?`,
@@ -2189,15 +2555,16 @@ app.post("/api/update-job", async (req, res) => {
     );
 
     if (result.affectedRows === 1) {
-      return res.status(200).json({ message: 'Job updated successfully' });
+      return res.status(200).json({ message: "Job updated successfully" });
     } else {
       return res.status(400).json({ error: "Job not updated" });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 });
+
 
 //API to get staticstics of jobs 
 app.get('/api/job-statistics/:status', async (req, res) => {
@@ -2316,6 +2683,111 @@ app.get('/api/job-statistics/:status', async (req, res) => {
 //   }
 // });
 
+// app.post("/api/accept-interns", async (req, res) => {
+//   const interns = req.body;
+//   console.log("Interns:", interns);
+
+//   const acceptedInterns = [];
+//   const rejectedInterns = [];
+
+//   try {
+//     // Extract emails and mobile numbers from the interns list
+//     const emails = interns.map(intern => intern.email);
+//     const mobileNos = interns.map(intern => intern.mobileNo);
+
+//     const existingInterns = await query(
+//       `SELECT email, mobileNo 
+//          FROM intern_data 
+//          WHERE email IN (?) OR mobileNo IN (?) 
+//          UNION 
+//          SELECT email, mobileno 
+//          FROM intern_data 
+//          WHERE email IN (?) OR mobileno IN (?)`,
+//       [
+//         emails.length > 0 ? emails : [null],
+//         mobileNos.length > 0 ? mobileNos : [null],
+//         emails.length > 0 ? emails : [null],
+//         mobileNos.length > 0 ? mobileNos : [null]
+//       ]
+//     );
+//     console.log(existingInterns);
+//     const existingEmails = new Set(existingInterns.map(intern => intern.email));
+//     const existingPhones = new Set(existingInterns.map(intern => intern.mobileNo));
+
+//     // Get the current year (last two digits)
+//     const currentYear = new Date().getFullYear().toString().slice(-2);
+
+//     for (const intern of interns) {
+//       // Extract the first letter of the domain (uppercase)
+//       const domainFirstLetter = intern.domain.charAt(0).toUpperCase();
+
+//       if (!existingEmails.has(intern.email) && !existingPhones.has(intern.mobileNo)) {
+//         // Find the last number for this domain
+//         const likePattern = `RS${currentYear}${domainFirstLetter}%`;
+//         const lastInternQuery = `
+//           SELECT candidateID 
+//           FROM intern_data 
+//           WHERE candidateID LIKE ? 
+//           ORDER BY candidateID DESC 
+//           LIMIT 1`;
+//         const lastInternResult = await query(lastInternQuery, [likePattern]);
+
+//         let lastInternNumber = 1;  // Default to 1 if no intern exists
+//         if (lastInternResult.length > 0) {
+//           // Extract the number from the last candidateID (e.g., RS24A001 -> 001)
+//           lastInternNumber = parseInt(lastInternResult[0].candidateID.slice(-3)) + 1;
+//         }
+
+//         const newCandidateID = `RS${currentYear}${domainFirstLetter}${String(lastInternNumber).padStart(3, '0')}`;
+//         console.log(newCandidateID);
+
+//         await query(
+//           'INSERT INTO intern_data (candidateID, fullName, email, mobileNo, altMobileNo, domain, belongedToVasaviFoundation, address, batchNo, modeOfInternship, dateAccepted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+//           [
+//             newCandidateID,
+//             intern.fullName,
+//             intern.email,
+//             intern.mobileNo,
+//             intern.altMobileNo,
+//             intern.domain,
+//             intern.belongedToVasaviFoundation,
+//             intern.address,
+//             intern.batchNo,
+//             intern.modeOfInternship
+//           ]
+//         );
+//         acceptedInterns.push({ ...intern, internID: newCandidateID });
+//       } else {
+//         rejectedInterns.push(intern);
+//       }
+//     }
+
+//     if (acceptedInterns.length > 0) {
+//       await query(
+//         'DELETE FROM intern_requests WHERE email IN (?) OR mobileNo IN (?)',
+//         [
+//           acceptedInterns.map(intern => intern.email),
+//           acceptedInterns.map(intern => intern.mobileNo)
+//         ]
+//       );
+//     }
+
+//     // Send confirmation email to accepted interns
+//     const mailOptions = {
+//       subject: 'Registration Success',
+//       text: `Your request is approved`,
+//     };
+//     const emailPromises = acceptedInterns.map(intern => sendEmail(intern.email, mailOptions));
+//     await Promise.all(emailPromises);
+
+//     // Return accepted and rejected interns
+//     res.status(200).json({ accepted: acceptedInterns, rejected: rejectedInterns });
+//   } catch (error) {
+//     console.error('Error processing interns:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
+
 app.post("/api/accept-interns", async (req, res) => {
   const interns = req.body;
   console.log("Interns:", interns);
@@ -2325,8 +2797,8 @@ app.post("/api/accept-interns", async (req, res) => {
 
   try {
     // Extract emails and mobile numbers from the interns list
-    const emails = interns.map(intern => intern.email);
-    const mobileNos = interns.map(intern => intern.mobileNo);
+    const emails = interns.map((intern) => intern.email);
+    const mobileNos = interns.map((intern) => intern.mobileNo);
 
     const existingInterns = await query(
       `SELECT email, mobileNo 
@@ -2340,12 +2812,13 @@ app.post("/api/accept-interns", async (req, res) => {
         emails.length > 0 ? emails : [null],
         mobileNos.length > 0 ? mobileNos : [null],
         emails.length > 0 ? emails : [null],
-        mobileNos.length > 0 ? mobileNos : [null]
+        mobileNos.length > 0 ? mobileNos : [null],
       ]
     );
+
     console.log(existingInterns);
-    const existingEmails = new Set(existingInterns.map(intern => intern.email));
-    const existingPhones = new Set(existingInterns.map(intern => intern.mobileNo));
+    const existingEmails = new Set(existingInterns.map((intern) => intern.email));
+    const existingPhones = new Set(existingInterns.map((intern) => intern.mobileNo));
 
     // Get the current year (last two digits)
     const currentYear = new Date().getFullYear().toString().slice(-2);
@@ -2365,17 +2838,19 @@ app.post("/api/accept-interns", async (req, res) => {
           LIMIT 1`;
         const lastInternResult = await query(lastInternQuery, [likePattern]);
 
-        let lastInternNumber = 1;  // Default to 1 if no intern exists
+        let lastInternNumber = 1; // Default to 1 if no intern exists
         if (lastInternResult.length > 0) {
           // Extract the number from the last candidateID (e.g., RS24A001 -> 001)
           lastInternNumber = parseInt(lastInternResult[0].candidateID.slice(-3)) + 1;
         }
 
-        const newCandidateID = `RS${currentYear}${domainFirstLetter}${String(lastInternNumber).padStart(3, '0')}`;
+        const newCandidateID = `RS${currentYear}${domainFirstLetter}${String(lastInternNumber).padStart(3, "0")}`;
         console.log(newCandidateID);
 
         await query(
-          'INSERT INTO intern_data (candidateID, fullName, email, mobileNo, altMobileNo, domain, belongedToVasaviFoundation, address, batchNo, modeOfInternship) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          `INSERT INTO intern_data 
+            (candidateID, fullName, email, mobileNo, altMobileNo, domain, belongedToVasaviFoundation, address, batchNo, modeOfInternship, dateAccepted, endDate) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 3 MONTH))`,
           [
             newCandidateID,
             intern.fullName,
@@ -2386,7 +2861,7 @@ app.post("/api/accept-interns", async (req, res) => {
             intern.belongedToVasaviFoundation,
             intern.address,
             intern.batchNo,
-            intern.modeOfInternship
+            intern.modeOfInternship,
           ]
         );
         acceptedInterns.push({ ...intern, internID: newCandidateID });
@@ -2397,29 +2872,32 @@ app.post("/api/accept-interns", async (req, res) => {
 
     if (acceptedInterns.length > 0) {
       await query(
-        'DELETE FROM intern_requests WHERE email IN (?) OR mobileNo IN (?)',
+        `DELETE FROM intern_requests WHERE email IN (?) OR mobileNo IN (?)`,
         [
-          acceptedInterns.map(intern => intern.email),
-          acceptedInterns.map(intern => intern.mobileNo)
+          acceptedInterns.map((intern) => intern.email),
+          acceptedInterns.map((intern) => intern.mobileNo),
         ]
       );
     }
 
     // Send confirmation email to accepted interns
     const mailOptions = {
-      subject: 'Registration Success',
+      subject: "Registration Success",
       text: `Your request is approved`,
     };
-    const emailPromises = acceptedInterns.map(intern => sendEmail(intern.email, mailOptions));
+    const emailPromises = acceptedInterns.map((intern) =>
+      sendEmail(intern.email, mailOptions)
+    );
     await Promise.all(emailPromises);
 
     // Return accepted and rejected interns
     res.status(200).json({ accepted: acceptedInterns, rejected: rejectedInterns });
   } catch (error) {
-    console.error('Error processing interns:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error processing interns:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // app.post("/api/accept-guests", async (req, res) => {
 //   const guests = req.body;
@@ -2582,7 +3060,7 @@ app.post("/api/accept-guests", async (req, res) => {
         console.log(newGuestID);
 
         await query(
-          'INSERT INTO guest_data (guestID, fullName, email, mobileno, altmobileno, address, batchno, modeOfTraining, program, domain, megadriveStatus, BelongedToVasaviFoundation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?)',
+          'INSERT INTO guest_data (guestID, fullName, email, mobileno, altmobileno, address, batchno, modeOfTraining, program, domain, megadriveStatus, BelongedToVasaviFoundation, dateAccepted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, NOW())',
           [
             newGuestID,
             guest.fullName,
@@ -3916,7 +4394,7 @@ app.get("/api/hr-view-jobs", async (req, res) => {
 
 app.get("/api/hr-view-jobs-status", async (req, res) => {
   const { status, hrId } = req.query
-
+  console.log(status, hrId);
   try {
     let sql = '';
     if (status == "all-jobs") {
@@ -3926,7 +4404,7 @@ app.get("/api/hr-view-jobs-status", async (req, res) => {
       sql = `SELECT * FROM jobs WHERE status='${status}' and postedBy = '${hrId}'`;
     }
     const rows = await query(sql);
-
+    console.log(rows);
     res.status(200).json(rows); // Send back the modified rows
   } catch (err) {
     console.error(err);
@@ -4831,7 +5309,6 @@ app.post('/api/save-lms-questions', (req, res) => {
       console.error('Error updating quiz:', err);
       return res.status(500).send('Error updating quiz');
     }
-    console.log(result);
     res.status(200).send('Quiz updated successfully');
   });
 
@@ -5606,7 +6083,6 @@ app.put('/api/hr_access/:id', async (req, res) => {
       'UPDATE hr_data SET access = ? WHERE HRid = ?',
       [accessJson, id]
     );
-    console.log(result);
     if (result.affectedRows === undefined || result.affectedRows === 0) {
       return res.status(404).json({ message: 'HR record not found' });
     }
@@ -5629,7 +6105,6 @@ app.get('/api/hr_access/:id', async (req, res) => {
       [id]
     );
 
-    console.log(result);
     if (!result) {
       return res.status(404).json({ message: 'HR record not found' });
     }
@@ -5902,5 +6377,562 @@ app.get('/api/check-guidelines/:candidateID', async (req, res) => {
   } catch (error) {
     console.error('Error checking guidelines status:', error);
     res.status(500).json({ message: 'Failed to retrieve guidelines status.' });
+  }
+});
+
+
+
+
+//placement statistics for super admin
+app.get('/api/placement_report', async (req, res) => {
+
+  try {
+    let result;
+    if (status === 'applied') {
+      [result] = await query('SELECT COUNT(*) as count FROM applied_students;')
+
+    }
+    else {
+      [result] = await query(`SELECT COUNT(*) as count FROM applied_students WHERE status='${status}'`)
+    }
+    console.log(result.count)
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+})
+
+
+
+
+// app.get('/api/hr-stats', async (req, res) => {
+//   console.log("HRStats API called");
+//   try {
+//     const sqlQuery = `
+//       SELECT 
+//     hr_data.fullName AS hr_name,
+//     hr_data.HRid AS hrID,
+//     jobs.postedOn,
+//     COUNT(DISTINCT jobs.jobId) AS drives_conducted,
+//     SUM(CASE WHEN jobs.status = 'jd-received' THEN 1 ELSE 0 END) AS selected,
+//     SUM(CASE WHEN jobs.status = 'profiles-sent' THEN 1 ELSE 0 END) AS sent_profiles,
+//     SUM(CASE WHEN jobs.status = 'drive-done' THEN 1 ELSE 0 END) AS attended,
+//     SUM(CASE WHEN jobs.status = 'profiles-sent' THEN 1 ELSE 0 END) AS rejected,
+//     SUM(CASE WHEN jobs.status = 'drive-scheduled' THEN 1 ELSE 0 END) AS in_progress,
+//     SUM(CASE WHEN jobs.status = 'profiles-sent' THEN 1 ELSE 0 END) AS drives_pending
+// FROM 
+//     hr_data
+// LEFT JOIN jobs ON jobs.postedBy = hr_data.HRid 
+// GROUP BY 
+//     hr_data.fullName, hr_data.HRid, jobs.postedOn
+// ORDER BY 
+//     hr_data.HRid;
+
+//     `;
+//     const result = await query(sqlQuery);
+//     res.status(200).json(result);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server Error" });
+//   }
+// });
+
+
+app.get('/api/hr-stats', async (req, res) => {
+  console.log("HRStats API called");
+  try {
+    const sqlQuery = `
+    SELECT 
+  hr_data.HRid AS hr_id,
+  hr_data.fullName AS hr_name,
+  COUNT(DISTINCT jobs.jobId) AS jobs_posted,
+  SUM(CASE WHEN jobs.status = 'profiles-sent' THEN 1 ELSE 0 END) AS sent_profiles,
+  SUM(CASE WHEN jobs.status IN ('drive-done', 'offer-received') THEN 1 ELSE 0 END) AS drives_done,
+  COUNT(DISTINCT jobs.jobId) - SUM(CASE WHEN jobs.status = 'drive-done' THEN 1 ELSE 0 END) AS drives_pending
+FROM 
+  hr_data
+LEFT JOIN jobs ON jobs.postedBy = hr_data.HRid 
+GROUP BY 
+  hr_data.fullName, hr_data.HRid
+ORDER BY 
+  hr_data.fullName;
+
+    `;
+    const result = await query(sqlQuery);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+// app.get('/api/jobs_sdudents-stats', async (req, res) => {
+//   console.log("Jobs_students Stats API called");
+//   try {
+//     const sqlQuery =
+//       `
+// SELECT 
+//     hr_data.fullName AS hr_name,
+//     COUNT(DISTINCT applied_students.candidateID) AS total_applications_received,
+//     COUNT(DISTINCT CASE WHEN applied_students.status = 'eligible' THEN applied_students.candidateID END) AS total_profiles_sent,
+//     COUNT(DISTINCT CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END) AS total_not_attended,
+//     COUNT(DISTINCT CASE WHEN applied_students.status = 'eligible' THEN applied_students.candidateID END) - COUNT(DISTINCT CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END) AS total_attended,
+//     COUNT(DISTINCT CASE WHEN applied_students.status = 'placed' THEN applied_students.candidateID END) AS total_placed,
+//     COUNT(DISTINCT CASE WHEN applied_students.status = 'eligible' THEN applied_students.candidateID END) - COUNT(DISTINCT CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END) - COUNT(DISTINCT CASE WHEN applied_students.status = 'placed' THEN applied_students.candidateID END) AS total_rejected,
+//     COUNT(DISTINCT CASE WHEN applied_students.status = 'eligible' THEN applied_students.candidateID END) - COUNT(DISTINCT CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END) - (COUNT(DISTINCT CASE WHEN applied_students.status = 'eligible' THEN applied_students.candidateID END) - COUNT(DISTINCT CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END) - COUNT(DISTINCT CASE WHEN applied_students.status = 'placed' THEN applied_students.candidateID END) + COUNT(DISTINCT CASE WHEN applied_students.status = 'placed' THEN applied_students.candidateID END)) AS total_pending
+//     FROM 
+//     hr_data
+// LEFT JOIN jobs ON jobs.postedBy = hr_data.HRid
+// LEFT JOIN applied_students ON applied_students.jobID = jobs.jobId
+// GROUP BY 
+//     hr_data.fullName, hr_data.HRid
+// ORDER BY 
+//     hr_data.fullName;
+// `;
+//     const result = await query(sqlQuery);
+//     console.log(result)
+//     res.status(200).json(result);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server Error" });
+//   }
+// });
+
+
+
+app.get('/api/jobs_sdudents-stats', async (req, res) => {
+  console.log("Jobs_students Stats API called");
+  try {
+    const sqlQuery = `
+SELECT 
+    hr_data.fullName AS hr_name,
+    SUM(CASE WHEN jobs.status = 'drive-done' AND jobs.postedBy = hr_data.HRid THEN 1 ELSE 0 END) AS drives_done,
+    COUNT(applied_students.candidateID) AS total_applications_received,
+    COUNT(CASE WHEN applied_students.status = 'not-eligible' THEN applied_students.candidateID END) AS not_eligible,
+    
+    COUNT(applied_students.candidateID) - COUNT(CASE WHEN applied_students.status = 'not-eligible' THEN applied_students.candidateID END) AS profiles_sent,
+    COUNT(CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END) AS not_attended,
+    (COUNT(applied_students.candidateID) - COUNT(CASE WHEN applied_students.status = 'not-eligible' THEN applied_students.candidateID END)) - COUNT(CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END)  AS attended,
+    COUNT(CASE WHEN applied_students.status = 'placed' THEN applied_students.candidateID END) AS selected,
+    COUNT( CASE WHEN applied_students.status = 'not-placed' THEN applied_students.candidateID END) AS rejected,
+    ((COUNT(applied_students.candidateID) - COUNT(CASE WHEN applied_students.status = 'not-eligible' THEN applied_students.candidateID END)) - COUNT(CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END))
+      - (COUNT( CASE WHEN applied_students.status = 'placed' THEN applied_students.candidateID END)
+      + COUNT( CASE WHEN applied_students.status = 'not-placed' THEN applied_students.candidateID END)) AS pending
+FROM 
+    hr_data
+LEFT JOIN jobs ON jobs.postedBy = hr_data.HRid
+LEFT JOIN applied_students ON applied_students.jobID = jobs.jobId
+GROUP BY 
+    hr_data.fullName, hr_data.HRid
+ORDER BY 
+    hr_data.fullName;
+
+    `;
+
+    const result = await query(sqlQuery);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+// app.get('/api/hr-stats', async (req, res) => {
+//   console.log("HRStats API called");
+//   try {
+//     const sqlQuery = `
+//       SELECT
+//           hr_data.fullName AS hr_name,
+// jobs.postedOn,
+//           COUNT(DISTINCT jobs.jobId) AS drives_conducted,
+//           SUM(CASE WHEN jobs.status = 'jd-received' THEN 1 ELSE 0 END) AS selected,
+//           SUM(CASE WHEN jobs.status = 'profiles-sent' THEN 1 ELSE 0 END) AS sent_profiles,
+//           SUM(CASE WHEN jobs.status = 'drive-done' THEN 1 ELSE 0 END) AS attended,
+//           SUM(CASE WHEN jobs.status = 'profiles-sent' THEN 1 ELSE 0 END) AS rejected,
+//           SUM(CASE WHEN jobs.status = 'drive-scheduled' THEN 1 ELSE 0 END) AS in_progress,
+//           SUM(CASE WHEN jobs.status = 'profiles-sent' THEN 1 ELSE 0 END) AS drives_pending
+//       FROM
+//           hr_data
+//       LEFT JOIN jobs ON jobs.postedBy = hr_data.HRid
+//       GROUP BY
+//           hr_data.fullName, jobs.postedOn
+//       ORDER BY
+//           hr_data.fullName DESC;
+//     `;
+//     const result = await query(sqlQuery);
+//     res.status(200).json(result);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server Error' });
+//   }
+// });
+
+
+// app.get('/api/domain-stats', async (req, res) => {
+//   const domainOptions = [
+//     "Python Full Stack", "Java Full Stack", "Mern Full Stack",
+//     "Testing Tools", "Scrum Master", "Business Analyst",
+//     "Data Science", "Cyber Security", "Cloud Data Engineer",
+//     "AI & Data Science", "DevOps & Cloud Computing",
+//     "Project Management & Agile", "SalesForce",
+//     "Full Stack Development", "Medical Coding",
+//     "Investment Banking", "BI Reporting Tools",
+//     "Microsoft Dynamics", "Service Now"
+//   ];
+
+//   try {
+//     // Create a temporary table for domains if it doesn't exist
+//     await query(`
+//           CREATE TEMPORARY TABLE IF NOT EXISTS temp_domains (
+//               domain VARCHAR(255)
+//           )
+//       `);
+
+//     // Clear the temporary table
+//     await query('TRUNCATE TABLE temp_domains');
+
+//     // Insert domains into temporary table
+//     const insertDomainValues = domainOptions.map(domain => `('${domain}')`).join(',');
+//     await query(`INSERT INTO temp_domains (domain) VALUES ${insertDomainValues}`);
+
+//     const sqlQuery = `
+//       SELECT 
+//           td.domain,
+//           COUNT(DISTINCT j.jobId) AS total_jobs_posted,
+//           COUNT(DISTINCT CASE WHEN a.status = 'eligible' THEN a.candidateID END) AS profiles_sent,
+//           COUNT(DISTINCT CASE WHEN a.status = 'eligible' THEN a.candidateID END) 
+//               - COUNT(DISTINCT CASE WHEN a.status = 'not-attended' THEN a.candidateID END) AS attended,
+//           COUNT(DISTINCT CASE WHEN a.status = 'placed' THEN a.candidateID END) AS selected,
+//           (COUNT(DISTINCT CASE WHEN a.status = 'eligible' THEN a.candidateID END) 
+//               - COUNT(DISTINCT CASE WHEN a.status = 'not-attended' THEN a.candidateID END)) 
+//               - COUNT(DISTINCT CASE WHEN a.status = 'placed' THEN a.candidateID END) AS rejected,
+//           (COUNT(DISTINCT CASE WHEN a.status = 'eligible' THEN a.candidateID END) 
+//               - COUNT(DISTINCT CASE WHEN a.status = 'not-attended' THEN a.candidateID END)) 
+//               - ( 
+//                   (COUNT(DISTINCT CASE WHEN a.status = 'eligible' THEN a.candidateID END) 
+//                       - COUNT(DISTINCT CASE WHEN a.status = 'not-attended' THEN a.candidateID END)) 
+//                   - COUNT(DISTINCT CASE WHEN a.status = 'placed' THEN a.candidateID END)
+//                   + COUNT(DISTINCT CASE WHEN a.status = 'placed' THEN a.candidateID END)
+//               ) AS pending
+//       FROM 
+//           temp_domains td
+//       LEFT JOIN 
+//           jobs j ON JSON_CONTAINS(j.domains, JSON_QUOTE(td.domain))
+//       LEFT JOIN 
+//           applied_students a ON a.jobID = j.jobId
+//       GROUP BY 
+//           td.domain
+//       ORDER BY 
+//           total_jobs_posted DESC, td.domain
+//   `;
+
+
+//     const result = await query(sqlQuery);
+
+//     // Drop the temporary table
+//     await query('DROP TEMPORARY TABLE IF EXISTS temp_domains');
+
+//     res.status(200).json(result);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server Error" });
+//   }
+// });
+
+
+app.get('/api/domain-stats', async (req, res) => {
+  const domainOptions = [
+    "Python Full Stack", "Java Full Stack", "Mern Full Stack",
+    "Testing Tools", "Scrum Master", "Business Analyst", "Dot Net",
+    "Data Science", "Cyber Security", "Cloud Data Engineer",
+    "DevOps & Cloud Computing",
+    "Project Management & Agile", "SalesForce",
+    "Medical Coding",
+    "Investment Banking", "BI Reporting Tools",
+    "Microsoft Dynamics", "Service Now"
+  ];
+
+  try {
+    // Create a temporary table for domains if it doesn't exist
+    await query(`
+          CREATE TEMPORARY TABLE IF NOT EXISTS temp_domains (
+              domain VARCHAR(255)
+          )
+      `);
+
+    // Clear the temporary table
+    await query('TRUNCATE TABLE temp_domains');
+
+    // Insert domains into temporary table
+    const insertDomainValues = domainOptions.map(domain => `('${domain}')`).join(',');
+    await query(`INSERT INTO temp_domains (domain) VALUES ${insertDomainValues}`);
+
+    const sqlQuery = `
+SELECT 
+    td.domain,
+    COUNT(DISTINCT j.jobId) AS total_jobs_posted,
+    COUNT(a.candidateID) AS total_students_applied,
+    COUNT(DISTINCT CASE WHEN a.status = 'not-eligible' THEN a.candidateID END) AS not_eligible,
+    COUNT(a.candidateID) - COUNT(DISTINCT CASE WHEN a.status = 'not-eligible' THEN a.candidateID END) AS profiles_sent,
+    (COUNT(a.candidateID) - COUNT(DISTINCT CASE WHEN a.status = 'not-eligible' THEN a.candidateID END))
+        - COUNT(DISTINCT CASE WHEN a.status = 'not-attended' THEN a.candidateID END) AS attended,
+    COUNT(DISTINCT CASE WHEN a.status = 'placed' THEN a.candidateID END) AS selected,
+    COUNT(DISTINCT CASE WHEN a.status = 'not-placed' THEN a.candidateID END) AS rejected,
+    
+    -- Corrected 'pending' calculation
+    (COUNT(a.candidateID) - COUNT(DISTINCT CASE WHEN a.status = 'not-eligible' THEN a.candidateID END))
+        - COUNT(DISTINCT CASE WHEN a.status = 'not-attended' THEN a.candidateID END)
+        - (COUNT(DISTINCT CASE WHEN a.status = 'placed' THEN a.candidateID END)
+        + COUNT(DISTINCT CASE WHEN a.status = 'not-placed' THEN a.candidateID END)) AS pending,
+
+    COUNT(DISTINCT CASE WHEN j.status IN ('drive-done', 'offer-received') THEN j.jobId END) AS drives_done
+FROM 
+    temp_domains td
+LEFT JOIN 
+    jobs j ON JSON_CONTAINS(j.domains, JSON_QUOTE(td.domain))
+LEFT JOIN 
+    applied_students a ON a.jobID = j.jobId
+GROUP BY 
+    td.domain
+ORDER BY 
+    total_jobs_posted DESC, td.domain;
+
+    `;
+
+    const result = await query(sqlQuery);
+
+    // Drop the temporary table
+    await query('DROP TEMPORARY TABLE IF EXISTS temp_domains');
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+
+// Endpoint to search data by column HallTicket
+app.get('/api/search', (req, res) => {
+  const query = req.query.query; // Get the search query from the URL parameter
+  console.log(query);
+  // Check if query is provided
+  if (!query) {
+    console.log("No search query found");
+    return res.status(400).json({ error: 'No search query provided' });
+  }
+
+  // Get data from the "results" table
+  const sqlQuery = 'SELECT * FROM results WHERE Mobile = ? and examstatus = "completed"';
+  console.log(sqlQuery);
+  db2.query(sqlQuery, [query], (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    // Check if results were found
+    if (results.length === 0) {
+      console.log("No data found in results table")
+      return res.status(404).json({ error: 'No data found in results table' });
+    }
+
+    const email = results[0].Email;
+
+    // Get data from the "MeritResults" table
+    const sqlMerit = 'SELECT * FROM meritresults WHERE Email = ?';
+    db2.query(sqlMerit, [email], (err, meritResults) => {
+      if (err) {
+        console.error('Error executing query:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      // Combine both results and return a single response
+      res.status(200).json({
+        resultsTable: results,
+        meritResultsTable: meritResults,
+      });
+    });
+  });
+});
+
+
+
+app.post('/api/toggle_block_hr/:HRid', async (req, res) => {
+  const { HRid } = req.params;
+  const { blockProfile } = req.body;
+
+  try {
+    await query('UPDATE hr_data SET blockProfile = ? WHERE HRid = ?', [blockProfile, HRid]);
+    res.status(200).json({ message: `HR ${blockProfile ? "blocked" : "unblocked"} successfully.` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+app.post('/api/toggle_block_intern/:candidateID', async (req, res) => {
+  const { candidateID } = req.params;
+  const { blockProfile } = req.body;
+
+  try {
+    await query('UPDATE intern_data SET blockProfile = ? WHERE candidateID = ?', [blockProfile, candidateID]);
+    res.status(200).json({ message: `Intern ${blockProfile ? "blocked" : "unblocked"} successfully.` });
+  } catch (error) {
+    console.error('Error toggling block status:', error);
+    res.status(500).json({ message: 'Error toggling block status.' });
+  }
+});
+
+
+app.post('/api/toggle_block_guest/:candidateID', async (req, res) => {
+  const { candidateID } = req.params;
+  const { blockProfile } = req.body;
+
+  try {
+    await query('UPDATE guest_data SET blockProfile = ? WHERE guestID = ?', [blockProfile, candidateID]);
+    res.status(200).json({ message: `Guest ${blockProfile ? "blocked" : "unblocked"} successfully.` });
+  } catch (error) {
+    console.error('Error toggling block status:', error);
+    res.status(500).json({ message: 'Error toggling block status.' });
+  }
+});
+
+
+
+
+
+app.get('/api/job-stats/:id', async (req, res) => {
+  console.log("HRStats API called for job ID:", req.params.id);
+
+  const jobId = req.params.id;  // Get the job ID from the request parameters
+  
+  try {
+    // SQL query with parameterized jobId
+    const sqlQuery = `
+    SELECT 
+      COUNT(applied_students.applicationID) AS Students_applied,
+      SUM(CASE WHEN applied_students.status = 'eligible' THEN 1 ELSE 0 END) AS Profiles_Sent,
+      SUM(CASE WHEN applied_students.status = 'placed' THEN 1 ELSE 0 END) AS Placed,
+      SUM(CASE WHEN applied_students.status = 'not-placed' THEN 1 ELSE 0 END) AS Rejected,
+      SUM(CASE WHEN applied_students.status = 'not-Attended' THEN 1 ELSE 0 END) AS Not_Attended,
+      SUM(CASE WHEN applied_students.status = 'not-eligible' THEN 1 ELSE 0 END) AS Not_Eligible     
+    FROM 
+      applied_students 
+    WHERE
+      applied_students.jobID = ?
+    GROUP BY 
+      applied_students.jobID
+    `;
+    
+    // Execute the query with the jobId parameter
+    const result = await query(sqlQuery, [jobId]);
+    console.log(result);
+    // Return the result in the response
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+
+
+
+app.get('/api/jobs_sdudents-stats', async (req, res) => {
+  console.log("Jobs_students Stats API called");
+  try {
+    const sqlQuery = `
+SELECT 
+    hr_data.fullName AS hr_name,
+    SUM(CASE WHEN jobs.status = 'drive-done' AND jobs.postedBy = hr_data.HRid THEN 1 ELSE 0 END) AS drives_done,
+    COUNT(applied_students.candidateID) AS total_applications_received,
+    COUNT(CASE WHEN applied_students.status = 'not-eligible' THEN applied_students.candidateID END) AS not_eligible,
+    
+    COUNT(applied_students.candidateID) - COUNT(CASE WHEN applied_students.status = 'not-eligible' THEN applied_students.candidateID END) AS profiles_sent,
+    COUNT(CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END) AS not_attended,
+    (COUNT(applied_students.candidateID) - COUNT(CASE WHEN applied_students.status = 'not-eligible' THEN applied_students.candidateID END)) - COUNT(CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END)  AS attended,
+    COUNT(CASE WHEN applied_students.status = 'placed' THEN applied_students.candidateID END) AS selected,
+    COUNT( CASE WHEN applied_students.status = 'not-placed' THEN applied_students.candidateID END) AS rejected,
+    ((COUNT(applied_students.candidateID) - COUNT(CASE WHEN applied_students.status = 'not-eligible' THEN applied_students.candidateID END)) - COUNT(CASE WHEN applied_students.status = 'not-attended' THEN applied_students.candidateID END))
+      - (COUNT( CASE WHEN applied_students.status = 'placed' THEN applied_students.candidateID END)
+      + COUNT( CASE WHEN applied_students.status = 'not-placed' THEN applied_students.candidateID END)) AS pending
+FROM 
+    hr_data
+LEFT JOIN jobs ON jobs.postedBy = hr_data.HRid
+LEFT JOIN applied_students ON applied_students.jobID = jobs.jobId
+GROUP BY 
+    hr_data.fullName, hr_data.HRid
+ORDER BY 
+    hr_data.fullName;
+
+    `;
+
+    const result = await query(sqlQuery);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+app.get('/api/hr-status/:HRid', async (req, res) => {
+  const HRid = req.params.HRid; // Access HRid properly
+  try {
+    const [hr] = await query(`SELECT blockProfile FROM hr_data WHERE HRid = ?`, [HRid]); // Parameterized query to prevent SQL injection
+    if (!hr) {
+      return res.status(404).json({ message: 'HR not found' });
+    }
+    res.json({ blockProfile: hr.blockProfile });
+  } catch (error) {
+    console.error('Error fetching HR status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.get('/api/intern-status/:internID', async (req, res) => {
+  const internID = req.params.internID; // Access internID properly
+  try {
+    const [intern] = await query(`SELECT blockProfile FROM intern_data WHERE candidateID = ?`, [internID]); // Parameterized query
+    console.log(intern);
+    if (!intern) {
+      return res.status(404).json({ message: 'Intern not found' });
+    }
+    res.json({ blockProfile: intern.blockProfile });
+  } catch (error) {
+    console.error('Error fetching intern status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
+app.get('/api/guest-status/:guestID', async (req, res) => {
+  const guestID = req.params.guestID; // Access guestID properly
+  try {
+    const [guest] = await query(`SELECT blockProfile FROM guest_data WHERE guestID = ?`, [guestID]); // Parameterized query
+    if (!guest) {
+      return res.status(404).json({ message: 'Guest not found' });
+    }
+    res.json({ blockProfile: guest.blockProfile });
+  } catch (error) {
+    console.error('Error fetching guest status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.get('/api/hr-list', async (req, res) => {
+  try {
+    const hrList = await query(`SELECT HRid, fullName FROM hr_data`); // Adjust query based on your database structure
+    res.json(hrList);
+  } catch (error) {
+    console.error('Error fetching HR list:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const PageNotFound = () => {
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px', marginBottom:"50px", height:"430px" }}>
+    <div style={{ textAlign: 'center', marginTop: '50px', marginBottom:"50px", height:"430px", color:"white" }}>
       <h1>404 - Page Not Found</h1>
       <p>The page you're looking for doesn't exist.</p>
       Go back to 
@@ -15,3 +15,4 @@ const PageNotFound = () => {
 };
 
 export default PageNotFound;
+

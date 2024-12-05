@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, Grid, Typography, Box, Pagination } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { FaAngleRight } from 'react-icons/fa';
@@ -6,8 +6,111 @@ import apiService from '../../../apiService';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaStopCircle, FaEdit, FaTrash, FaBan } from 'react-icons/fa';
 import AccessManagement from './AccessManagement';
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import { width } from '@mui/system';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
+const HrTable = ({ currentHrs, handleHRidClick, handleAccessClick, handleBlock, handleEditClick, handleDelete }) => {
+  const [rowData, setRowData] = useState(currentHrs);
+
+  useEffect(() => {
+    setRowData(currentHrs);
+  }, [currentHrs]);
+
+  const columnDefs = useMemo(() => [
+
+    {
+      headerName: "HR ID",
+      field: "HRid",
+      headerStyle: { textAlign: "center" },
+      width: "150",
+      sortable: true, filter: true,
+      cellRenderer: params => (
+        <button
+          onClick={() => handleHRidClick(params.value)}
+          style={{ color: "blue", border: "none", background: "none", cursor: "pointer" }}
+        >
+          {params.value}
+        </button>
+      ),
+    },
+    { headerName: "Name", field: "fullName", width: "200", headerStyle: { textAlign: "center" }, sortable: true, filter: true },
+    { headerName: "Work Email", field: "workEmail", width: "200", headerStyle: { textAlign: "center" }, sortable: true, filter: true },
+    { headerName: "Mobile", field: "workMobile", width: "150", headerStyle: { textAlign: "center" }, sortable: true, filter: true },
+    { headerName: "Branch", field: "branch", width: "150", headerStyle: { textAlign: "center" }, sortable: true, filter: true },
+    {
+      headerName: "Manage Access",
+      width: "150",
+      headerStyle: { textAlign: "center" },
+      sortable: true, filter: true,
+      cellRenderer: params => (
+        <button
+          onClick={() => handleAccessClick(params.data.HRid)}
+          style={{ color: "#1f2c39", border: "none", background: "none", cursor: "pointer" }}
+        >
+          Manage <FaEdit style={{ width: "16px" }} />
+        </button>
+      ),
+    },
+    {
+      headerName: "Actions",
+      headerStyle: { textAlign: "center" },
+      width: "150",
+      cellRenderer: params => (
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            onClick={() => handleBlock(params.data)}
+            style={{
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              color: params.data.blockProfile ? "red" : "black", // Red for blocked, black for unblocked
+            }}
+          >
+            {params.data.blockProfile ? (
+              <FaStopCircle style={{ width: "16px", color: "green" }} title="Unblock" />
+            ) : (
+              <FaBan style={{ width: "16px", color: "red" }} title="Block" />
+            )}
+          </button>
+          <button
+            onClick={() => handleEditClick(params.data)}
+            style={{ border: "none", background: "none", cursor: "pointer" }}
+          >
+            <FaEdit style={{ width: "16px", color: "#1f2c39" }} />
+          </button>
+          <button
+            onClick={() => handleDelete(params.data.HRid)}
+            style={{ border: "none", background: "none", cursor: "pointer" }}
+          >
+            <FaTrash style={{ width: "16px", color: "#1f2c39" }} />
+          </button>
+        </div>
+      ),
+    },
+  ], [handleHRidClick, handleAccessClick, handleBlock, handleEditClick, handleDelete]);
+
+  return (
+    <div className="ag-theme-alpine" style={{ height: "500px", width: "100%" }}>
+      <AgGridReact
+        rowData={rowData}
+        columnDefs={columnDefs}
+        domLayout="autoHeight"
+        pagination={true}
+        paginationPageSize={20}
+        suppressCellFocus={true}
+      />
+    </div>
+  );
+};
+
+
 
 const DisplayHRs = () => {
   const [hrs, setHrs] = useState([]);
@@ -22,7 +125,6 @@ const DisplayHRs = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAccessManagementOpen, setIsAccessManagementOpen] = useState(false);
   const [showJobs, setShowJobs] = useState(false);
-
   useEffect(() => {
     const fetchHrs = async () => {
       try {
@@ -50,7 +152,6 @@ const DisplayHRs = () => {
     branch: Yup.string().matches(/^[a-zA-Z0-9\s]+$/, 'Invalid branch').required('Branch is required'),
   });
 
-  const menuItems = ['home', 'jobGallery', 'lms', 'quiz', 'internRequests', 'guestRequests', 'internshipCertificate', 'offerLetter', 'bulkRegister', 'profile'];
 
   const formik = useFormik({
     initialValues: editingHr || {},
@@ -60,11 +161,18 @@ const DisplayHRs = () => {
       try {
         delete values.id;
         await apiService.put(`/api/hr_data/${values.HRid}`, values);
+  
+        // Success toast
+        toast.success('HR details updated successfully!');
+  
         // Optionally update HR list and reset editing state
         setHrs(hrs.map(hr => hr.HRid === values.HRid ? values : hr));
         setEditingHr(null);
       } catch (error) {
         console.error('Error updating HR:', error);
+  
+        // Error toast
+        toast.error('Error updating HR details. Please try again.');
       }
     }
   });
@@ -106,6 +214,32 @@ const DisplayHRs = () => {
   const handleEditClick = (hr) => {
     setEditingHr(hr);
   };
+
+
+  
+  const handleToggleBlock = async (hr) => {
+    try {
+      const updatedStatus = !hr.blockProfile; // Toggle blockProfile
+      await apiService.post(`/api/toggle_block_hr/${hr.HRid}`, { blockProfile: updatedStatus });
+
+      // Update the UI
+      setHrs(prevHrs =>
+        prevHrs.map(h =>
+          h.HRid === hr.HRid ? { ...h, blockProfile: updatedStatus } : h
+        )
+      );
+
+      // Show success toast
+      toast.success(`${updatedStatus ? "Blocked" : "Unblocked"} HR ID: ${hr.HRid} successfully!`);
+      console.log(`${updatedStatus ? "Blocked" : "Unblocked"} HR ID: ${hr.HRid}`);
+    } catch (error) {
+      // Show error toast
+      toast.error('Error Updating block status. Please try again.');
+      console.error('Error toggling block status:', error);
+    }
+  };
+
+
 
   const handleCancelEdit = () => {
     setEditingHr(null);
@@ -234,12 +368,7 @@ const DisplayHRs = () => {
   console.log(hrs);
   return (
     <div>
-      {isAccessManagementOpen && (
-        <AccessManagement
-          hrId={selectedHRid}
-          onClose={() => setIsAccessManagementOpen(false)}
-        />
-      )}
+
       {showJobs && selectedJobId && jobDetails ? (
         <div>
           <Typography variant="h6" gutterBottom>Job Details for Job ID: {selectedJobId}</Typography>
@@ -264,10 +393,8 @@ const DisplayHRs = () => {
               <TableHead>
                 <TableRow>
                   <TableCell style={tableStyles.headCell}>Job ID</TableCell>
-                  <TableCell style={tableStyles.headCell}>Role</TableCell>
                   <TableCell style={tableStyles.headCell}>Company</TableCell>
-                  <TableCell style={tableStyles.headCell}>Location</TableCell>
-                  <TableCell style={tableStyles.headCell}>Salary</TableCell>
+                  <TableCell style={tableStyles.headCell}>Role</TableCell>
                   <TableCell style={tableStyles.headCell}>Posted On</TableCell>
                   <TableCell style={tableStyles.headCell}>Last Date</TableCell>
                   <TableCell style={tableStyles.headCell}>Status</TableCell>
@@ -278,10 +405,8 @@ const DisplayHRs = () => {
                 {hrJobs.map(job => (
                   <TableRow key={job.jobId} style={tableStyles.row}>
                     <TableCell style={tableStyles.cell}>{job.jobId}</TableCell>
-                    <TableCell style={tableStyles.cell}>{job.jobTitle}</TableCell>
                     <TableCell style={tableStyles.cell}>{job.companyName}</TableCell>
-                    <TableCell style={tableStyles.cell}>{job.Location}</TableCell>
-                    <TableCell style={tableStyles.cell}>{job.salary}</TableCell>
+                    <TableCell style={tableStyles.cell}>{job.jobTitle}</TableCell>
                     <TableCell style={tableStyles.cell}>{job.postedOn}</TableCell>
                     <TableCell style={tableStyles.cell}>{job.lastDate}</TableCell>
                     <TableCell style={tableStyles.cell}>{job.status}</TableCell>
@@ -338,7 +463,7 @@ const DisplayHRs = () => {
               </Typography>
             </div>
             <Grid container spacing={2} direction="column">
-              {Object.keys(editingHr).filter(key => !['id', 'HRid', "workEmail", "workMobile", "access"].includes(key)).map((key) => (
+              {Object.keys(editingHr).filter(key => !['id', 'HRid', "workEmail", "workMobile", "access", "blockProfile"].includes(key)).map((key) => (
                 (key !== 'id' || key !== "email" || key !== 'workEmail' || key !== 'mobileNo') && (
                   <Grid item xs={12} sm={6} key={key}>
                     <TextField
@@ -393,86 +518,15 @@ const DisplayHRs = () => {
           </Box>
         ) : (
           <>
-            <Box sx={{ marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
-              <TextField
-                variant="outlined"
-                placeholder="Search here..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{
-                  width: { xs: '100%', sm: '70%' }, // Full width on small screens
-                }}
-              />
-            </Box>
-
-            <TableContainer component={Paper}>
-              <Table style={tableStyles.table}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell style={tableStyles.headCell}>HR ID</TableCell>
-                    <TableCell style={tableStyles.headCell}>Name</TableCell>
-                    <TableCell style={tableStyles.headCell}>Email</TableCell>
-                    <TableCell style={tableStyles.headCell}>Work Email</TableCell>
-                    <TableCell style={tableStyles.headCell}>Mobile</TableCell>
-                    <TableCell style={tableStyles.headCell}>Branch</TableCell>
-                    <TableCell style={tableStyles.headCell}>Manage Access</TableCell>
-                    <TableCell style={tableStyles.headCell}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {currentHrs.map(hr => (
-                    <TableRow key={hr.HRid} style={tableStyles.row}>
-                      <TableCell style={tableStyles.cell}>
-                        <button
-                          onClick={() => handleHRidClick(hr.HRid)}
-                          style={{ color: 'blue', border: 'none', background: 'none' }}
-                        >
-                          {hr.HRid}
-                        </button>
-                      </TableCell>
-                      <TableCell style={tableStyles.cell}>{hr.fullName}</TableCell>
-                      <TableCell style={tableStyles.cell}>{hr.email}</TableCell>
-                      <TableCell style={tableStyles.cell}>{hr.workEmail}</TableCell>
-                      <TableCell style={tableStyles.cell}>{hr.workMobile}</TableCell>
-                      <TableCell style={tableStyles.cell}>{hr.branch}</TableCell>
-                      <TableCell style={{ gap: "2px", alignItems: "center" }}>
-                        <Button onClick={() => handleAccessClick(hr.HRid)} style={{ alignItems: "center", color: '#1f2c39' }}>manage<FaEdit style={{ width: '40px' }} /></Button>
-                      </TableCell>
-
-                      <TableCell sx={{ display: 'flex' }}>
-                        <Button onClick={() => handleEditClick(hr)} sx={{ minWidth: 0, padding: 0 }}>
-                          <FaEdit style={{ width: '40px', color: '#1f2c39' }} />
-                        </Button>
-                        <Button onClick={() => handleDelete(hr.HRid)} sx={{ minWidth: 0, padding: 0 }}>
-                          <FaTrash style={{ width: '40px', color: '#1f2c39' }} />
-                        </Button>
-                      </TableCell>
-
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-            </TableContainer>
-
-            <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 4 }}>
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                color="primary"
-                sx={{
-                  '.MuiPagination-ul': {
-                    justifyContent: 'center',
-                  },
-                  '.MuiPaginationItem-root': {
-                    fontSize: { xs: '0.75rem', sm: '1rem' }, // Smaller pagination buttons on small screens
-                  },
-                }}
-              />
-            </Box>
+            <HrTable currentHrs={hrs} handleHRidClick={handleHRidClick} handleAccessClick={handleAccessClick} handleEditClick={handleEditClick} handleDelete={handleDelete} handleBlock={handleToggleBlock} />
           </>
         )
+      )}
+      {isAccessManagementOpen && (
+        <AccessManagement
+          hrId={selectedHRid}
+          onClose={() => setIsAccessManagementOpen(false)}
+        />
       )}
     </div>
   );

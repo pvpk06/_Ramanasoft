@@ -5,6 +5,10 @@
   color: white !important;
 }
 
+.logo-container{
+  align-items: center;
+  
+}
 .word span {
   display: inline-block;
   color: #c0c0c0 !important;
@@ -130,26 +134,26 @@
       text-align: center; /* Center the links */
       padding: 4px 0;
     }
-  
+
     .logo-container {
         font-size: 14px;
-
-        width: 400px;  /* Adjust font size on smaller screens */
+        width: 350px;
       }
     
-    span{
-      font-size: 10px;
+    .word span{
+      font-size: 18px;
     }
-
     
     .subtitle {
-      font-size: 12px;  /* Smaller subtitle for mobile */
+      font-size: 11px;
     }
   
     .col-12 {
-      padding: 8px 0;  /* Adjust padding for ultra-small screens */
+      padding: 8px 0;
     }
-  
+    .footer-rights-text{
+      font-size: 12px;
+    }
     .text-center {
       font-size: 10px;  /* Adjust text size for mobile */
     }

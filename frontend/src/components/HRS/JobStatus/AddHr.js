@@ -16,19 +16,19 @@ const AddHr = ({ closeModal }) => {
     address: '',
     hrId: HrId
   });
+  const navigate = useNavigate();
 
-  useEffect(()=>{
-    fetchCompanies();
-  },[])
-  
   const [errors, setErrors] = useState({});
   const [companies, setCompanies] = useState([])
 
+  useEffect(() => {
     const fetchCompanies = async () => {
       const response = await apiService.get(`/api/view-companies`)
       console.log(response)
       setCompanies(response.data)
     }
+    fetchCompanies()
+  }, [])
 
   const isExistingCompany = (company) => {
 

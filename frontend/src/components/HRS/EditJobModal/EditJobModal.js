@@ -3,17 +3,24 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, TextFi
 import { Formik, Field, Form as FormikForm, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import apiService from '../../../apiService'
+import { Domain } from '@mui/icons-material';
+import Autocomplete from '@mui/material/Autocomplete';
+import Checkbox from '@mui/material/Checkbox';
+import { CheckBoxOutlineBlank, CheckBox } from '@mui/icons-material';
+
 
 const validationSchema = Yup.object().shape({
   jobId: Yup.string().required('Job ID is required'),
   jobTitle: Yup.string().required('Job Title is required'),
   companyName: Yup.string().required('Company Name is required'),
   jobCategory: Yup.string().required('Job Category is required'),
+  domains: Yup.array().min(1, 'At least one domain must be selected').required('Domains are required'),
   jobDescription: Yup.string().required('Job Description is required'),
   jobExperience: Yup.string().required('Job Experience is required'),
   jobQualification: Yup.string().required('Job Qualification is required'),
   jobType: Yup.string().required('Job Type is required'),
   salary: Yup.string().required('Salary is required'),
+  requiredSkills: Yup.string().required('Required Skills are required'),
   phone: Yup.string().required('Phone is required'),
   email: Yup.string().email('Invalid email').required('Email is required'),
   Location: Yup.string().required('Location is required'),
@@ -26,6 +33,35 @@ const validationSchema = Yup.object().shape({
       'Last Date cannot be earlier than Posted On date'
     ),});
 
+
+
+    const domainOptions = [
+      { key: "Python Full Stack", value: "Python Full Stack" },
+      { key: "Java Full Stack", value: "Java Full Stack" },
+      { key: "Mern Full Stack", value: "Mern Full Stack" },
+      { key: "Testing Tools", value: "Testing Tools" },
+      { key: "Scrum Master", value: "Scrum Master" },
+      { key: "Business Analyst", value: "Business Analyst" },
+      { key: "Data Science", value: "Data Science" },
+      { key: "Cyber Security", value: "Cyber Security" },
+      { key: "Cloud Data Engineer", value: "Cloud Data Engineer" },
+      { key: "Dot Net", value: "Dot Net" },
+      { key: "DevOps & Cloud Computing", value: "DevOps & Cloud Computing" },
+      { key: "Project Management & Agile", value: "Project Management & Agile" },
+      { key: "SalesForce", value: "SalesForce" },
+      { key: "Medical Coding", value: "Medical Coding" },
+      { key: "Investment Banking", value: "Investment Banking" },
+      { key: "Digital Marketing", value: "Digital Marketing" },
+      { key: "BI Reporting Tools", value: "BI Reporting Tools" },
+      { key: "Microsoft Dynamics", value: "Microsoft Dynamics" },
+      { key: "Service Now", value: "Service Now" },
+    ];
+
+    
+    const icon = <CheckBoxOutlineBlank fontSize="small" />;
+const checkedIcon = <CheckBox fontSize="small" />;
+
+
 const EditJobModal = ({ show, handleClose, job, handleSave }) => {
   const [companyNames, setCompanyNames] = useState([]);
   const [companyDetails, setCompanyDetails] = useState({});
@@ -35,6 +71,7 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
     jobTitle: '',
     companyName: '',
     jobCategory: '',
+    domains : [],
     jobDescription: '',
     jobExperience: '',
     jobQualification: '',
@@ -55,11 +92,13 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
         jobTitle: job.jobTitle || '',
         companyName: job.companyName || '',
         jobCategory: job.jobCategory || '',
+        domains: job.domains || '',
         jobDescription: job.jobDescription || '',
         jobExperience: job.jobExperience || '',
         jobQualification: job.jobQualification || '',
         jobType: job.jobType || '',
         salary: job.salary || '',
+        requiredSkills: job?.requiredSkills || '',
         phone: job.phone || '',
         email: job.email || '',
         Location: job.Location || '',
@@ -179,23 +218,6 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
                   <TextField
                     select
                     fullWidth
-                    label="Job Category"
-                    name="jobCategory"
-                    value={values.jobCategory}
-                    onChange={handleChange}
-                    error={touched.jobCategory && Boolean(errors.jobCategory)}
-                    helperText={touched.jobCategory && errors.jobCategory}
-                  >
-                    <MenuItem value="">Select Category</MenuItem>
-                    <MenuItem value="Technical">Technical</MenuItem>
-                    <MenuItem value="Non-Technical">Non-Technical</MenuItem>
-                  </TextField>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    select
-                    fullWidth
                     label="Job Type"
                     name="jobType"
                     value={values.jobType}
@@ -211,19 +233,72 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
                   </TextField>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    select
+                    fullWidth
+                    label="Job Category"
+                    name="jobCategory"
+                    value={values.jobCategory}
+                    onChange={handleChange}
+                    error={touched.jobCategory && Boolean(errors.jobCategory)}
+                    helperText={touched.jobCategory && errors.jobCategory}
+                  >
+                    <MenuItem value="">Select Category</MenuItem>
+                    <MenuItem value="Technical">Technical</MenuItem>
+                    <MenuItem value="Non-Technical">Non-Technical</MenuItem>
+                  </TextField>
+                </Grid>
+                  
+                
+                <Grid item xs={12} sm={6}>
+  <Autocomplete
+    multiple
+    options={domainOptions}
+    getOptionLabel={(option) => option.value}
+    disableCloseOnSelect
+    value={domainOptions.filter(option => values.domains.includes(option.key))}
+    onChange={(event, newValue) => {
+      const selectedKeys = newValue.map((option) => option.key);
+      setFieldValue("domains", selectedKeys);
+    }}
+    isOptionEqualToValue={(option, value) => option.key === value.key}
+    renderOption={(props, option, { selected }) => (
+      <li {...props}>
+        <Checkbox
+          icon={icon}
+          checkedIcon={checkedIcon}
+          style={{ marginRight: 8 }}
+          checked={selected}
+        />
+        {option.value}
+      </li>
+    )}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Domains"
+        placeholder="Select Domains"
+        error={touched.domains && !!errors.domains}
+        helperText={touched.domains && errors.domains}
+      />
+    )}
+  />
+</Grid>
+
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    multiline
-                    minRows={4}
-                    label="Job Description"
-                    name="jobDescription"
-                    value={values.jobDescription}
+                    label="City"
+                    name="Location"
+                    value={values.Location}
                     onChange={handleChange}
-                    error={touched.jobDescription && Boolean(errors.jobDescription)}
-                    helperText={touched.jobDescription && errors.jobDescription}
+                    error={touched.Location && Boolean(errors.Location)}
+                    helperText={touched.Location && errors.Location}
                   />
                 </Grid>
+
+
 
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -244,6 +319,20 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
                   </TextField>
                 </Grid>
 
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Required Skills"
+                    name="requiredSkills"
+                    value={values.requiredSkills}
+                    onChange={handleChange}
+                    error={touched.requiredSkills && Boolean(errors.requiredSkills)}
+                    helperText={touched.requiredSkills && errors.requiredSkills}
+                  />
+                </Grid>
+
+
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
@@ -253,6 +342,51 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
                     onChange={handleChange}
                     error={touched.jobQualification && Boolean(errors.jobQualification)}
                     helperText={touched.jobQualification && errors.jobQualification}
+                  />
+                </Grid>
+
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    value={values.email}
+                    onChange={handleChange}
+                    error={touched.email && Boolean(errors.email)}
+                    helperText={touched.email && errors.email}
+                  />
+                </Grid>
+
+
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Phone"
+                    name="phone"
+                    value={values.phone}
+                    onChange={handleChange}
+                    error={touched.phone && Boolean(errors.phone)}
+                    helperText={touched.phone && errors.phone}
+                  />
+                </Grid>
+
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="Last Date"
+                    name="lastDate"
+                    min={today}
+                    value={values.lastDate}
+                    onChange={handleChange}
+                    InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: values.postedOn, // This will disable dates before the `postedOn` date
+                    }}                    error={touched.lastDate && Boolean(errors.lastDate)}
+                    helperText={touched.lastDate && errors.lastDate}
                   />
                 </Grid>
 
@@ -268,41 +402,6 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Phone"
-                    name="phone"
-                    value={values.phone}
-                    onChange={handleChange}
-                    error={touched.phone && Boolean(errors.phone)}
-                    helperText={touched.phone && errors.phone}
-                  />
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    name="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    error={touched.email && Boolean(errors.email)}
-                    helperText={touched.email && errors.email}
-                  />
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="City"
-                    name="Location"
-                    value={values.Location}
-                    onChange={handleChange}
-                    error={touched.Location && Boolean(errors.Location)}
-                    helperText={touched.Location && errors.Location}
-                  />
-                </Grid>
 
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -313,6 +412,20 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
                     onChange={handleChange}
                     error={touched.applicationUrl && Boolean(errors.applicationUrl)}
                     helperText={touched.applicationUrl && errors.applicationUrl}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    minRows={4}
+                    label="Job Description"
+                    name="jobDescription"
+                    value={values.jobDescription}
+                    onChange={handleChange}
+                    error={touched.jobDescription && Boolean(errors.jobDescription)}
+                    helperText={touched.jobDescription && errors.jobDescription}
                   />
                 </Grid>
 
@@ -331,22 +444,7 @@ const EditJobModal = ({ show, handleClose, job, handleSave }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    type="date"
-                    label="Last Date"
-                    name="lastDate"
-                    min={today}
-                    value={values.lastDate}
-                    onChange={handleChange}
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{
-                      min: values.postedOn, // This will disable dates before the `postedOn` date
-                    }}                    error={touched.lastDate && Boolean(errors.lastDate)}
-                    helperText={touched.lastDate && errors.lastDate}
-                  />
-                </Grid>
+
               </Grid>
             </DialogContent>
             <DialogActions>
@@ -378,7 +476,7 @@ export default EditJobModal;
 //   jobQualification: Yup.string()
 //     .matches(/^[A-Za-z0-9@#\$%\^&\*\(\)_\+\-=\[\]\{\};':"\\|,.<>\/? ]+$/, 'Job Qualification can contain alphanumerics and special characters')
 //     .required('Job Qualification is required'),
-//   requiredSkills: Yup.string().required('Required Skills are required'),
+  // requiredSkills: Yup.string().required('Required Skills are required'),
 //   jobCity: Yup.string()
 //     .matches(/^[A-Za-z ]+$/, 'Job City can only contain alphabetic characters')
 //     .required('Job City is required'),
@@ -411,7 +509,7 @@ export default EditJobModal;
 //             jobCategory: job?.jobCategory || '',
 //             jobExperience: job?.jobExperience || '',
 //             jobQualification: job?.jobQualification || '',
-//             requiredSkills: job?.requiredSkills || '',
+            // requiredSkills: job?.requiredSkills || '',
 //             jobCity: job?.Location || '',
 //             lastDate: job?.lastDate ? job.lastDate.split('T')[0] : '',
 //             jobDescription: job?.jobDescription || '',
@@ -499,26 +597,26 @@ export default EditJobModal;
 //                   </Col>
 //                 </Row>
 
-//                 <Row className="mb-3">
-//                   <Col>
-//                     <label className="text-gray-600">Job Qualification *</label>
-//                     <Field
-//                       name="jobQualification"
-//                       type="text"
-//                       className={`w-full p-2 border rounded ${touched.jobQualification && errors.jobQualification ? 'border-red-500' : ''}`}
-//                     />
-//                     <ErrorMessage name="jobQualification" component="div" className="text-red-500 text-sm" />
-//                   </Col>
-//                   <Col>
-//                     <label className="text-gray-600">Required Skills *</label>
-//                     <Field
-//                       name="requiredSkills"
-//                       type="text"
-//                       className={`w-full p-2 border rounded ${touched.requiredSkills && errors.requiredSkills ? 'border-red-500' : ''}`}
-//                     />
-//                     <ErrorMessage name="requiredSkills" component="div" className="text-red-500 text-sm" />
-//                   </Col>
-//                 </Row>
+                // <Row className="mb-3">
+                //   <Col>
+                //     <label className="text-gray-600">Job Qualification *</label>
+                //     <Field
+                //       name="jobQualification"
+                //       type="text"
+                //       className={`w-full p-2 border rounded ${touched.jobQualification && errors.jobQualification ? 'border-red-500' : ''}`}
+                //     />
+                //     <ErrorMessage name="jobQualification" component="div" className="text-red-500 text-sm" />
+                //   </Col>
+                //   <Col>
+                //     <label className="text-gray-600">Required Skills *</label>
+                //     <Field
+                //       name="requiredSkills"
+                //       type="text"
+                //       className={`w-full p-2 border rounded ${touched.requiredSkills && errors.requiredSkills ? 'border-red-500' : ''}`}
+                //     />
+                //     <ErrorMessage name="requiredSkills" component="div" className="text-red-500 text-sm" />
+                //   </Col>
+                // </Row>
 
 //                 <Row className="mb-3">
 //                   <Col>

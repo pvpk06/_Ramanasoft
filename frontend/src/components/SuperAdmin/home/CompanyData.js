@@ -351,6 +351,7 @@ const CompanyData = ({ companyID }) => {
               <option value="profiles-sent">Profiles sent</option>
               <option value="drive-scheduled">Drive Scheduled</option>
               <option value="drive-done">Drive Done</option>
+              <option value="offer-received">Offer received</option>
               <option value="not-interested">Not Interested</option>
             </Form.Select>
           </Col>

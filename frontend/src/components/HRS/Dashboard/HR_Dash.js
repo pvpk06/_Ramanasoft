@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet, useParams } from 'react-router-dom';
 import './HR_Dash.css';
-import RSLogo from './RSLogo.jpeg';
+import RSLogo from './RSLogo.png';
 import Cookies from 'js-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faSignOutAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -28,7 +28,6 @@ import PreviewQuiz from '../Quiz/quiz/preview/preview';
 import InternBulkRegister from '../BulkRegister/InternBulkUpload';
 import GuestBulkRegister from '../BulkRegister/GuestBulkUpload';
 import apiService from '../../../apiService';
-
 const HRDash = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,10 +35,10 @@ const HRDash = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [expandedMenus, setExpandedMenus] = useState({});
   const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
+
   const { '*': currentPath } = useParams();
   const name = Cookies.get('name');
-  const HRid = Cookies.get('HRid');
-
+  const HRid = Cookies.get("HRid");
   const menuItems = [
     { id: 'home', name: 'Dashboard', icon: 'fas fa-home' },
     {
@@ -47,70 +46,81 @@ const HRDash = () => {
       submenu: [
         { id: 'postjob', name: 'Post a Job', icon: 'fas fa-plus' },
         { id: 'jobs', name: 'All Jobs', icon: 'fas fa-list' },
-        { id: 'companies', name: 'Companies', icon: 'fas fa-envelope' },
+        { id: 'companies', name: 'Companies', icon: 'fas fa-caret-square-right' },
       ]
     },
     { id: 'lms', name: 'LMS', icon: 'fas fa-book' },
     { id: 'quiz', name: 'Quiz', icon: 'fa-solid fa-list-check' },
-    { id: 'internRequests', name: 'Intern Requests', icon: 'fa fa-file' },
-    { id: 'guestRequests', name: 'Guest Requests', icon: 'fa fa-file' },
-    { id: 'internshipCertificate', name: 'Certificate', icon: 'fa fa-file' },
-    { id: 'offerLetter', name: 'Offer Letter', icon: 'fa fa-file' },
-    {
-      id: 'bulkRegister', name: 'Bulk Register', icon: 'fas fa-list',
+    { id: 'internRequests', name: 'Intern Requests', icon: 'fa fa-user-plus' },
+    { id: 'guestRequests', name: 'Guest Requests', icon: 'fa fa-user-plus' },
+    { id: 'internshipCertificate', name: 'Certificate', icon: 'fa fa-file-alt' },
+    { id: 'offerLetter', name: 'Offer Letter', icon: 'fas fa-sticky-note' },
+	      {
+      id: 'bulkRegister', name: 'Bulk Register', icon: 'fas fa-file-export',
       submenu: [
-        { id: 'bulkIntern', name: 'Interns', icon: 'fas fa-plus' },
-        { id: 'bulkGuest', name: 'Guests', icon: 'fas fa-list' },
+        { id: 'bulkIntern', name: 'Interns', icon: 'fas fa-file-export' },
+        { id: 'bulkGuest', name: 'Guests', icon: 'fas fa-file-export' },
       ]
     },
     { id: 'profile', name: 'Profile', icon: 'fa fa-user' },
   ];
 
-  // Example of fetching accessible menu items
+
+  // useEffect(() => {
+  //   const fetchAccessRights = async () => {
+  //     try {
+  //       const response = await apiService.get(`/api/hr_access/${HRid}`);
+  //       const allowedAccess = response.data.access; // Array of accessible menu item IDs.
+  
+  //       // Filter menu items based on access rights.
+  //       const filterMenuItems = (items) =>
+  //         items.filter(item => {
+  //           if (item.submenu) {
+  //             item.submenu = filterMenuItems(item.submenu);
+  //             return allowedAccess.includes(item.id) || item.submenu.length > 0;
+  //           }
+  //           return allowedAccess.includes(item.id);
+  //         });
+  
+  //       const filteredItems = filterMenuItems(menuItems);
+  
+  //       // Ensure "Dashboard" and "Profile" are always accessible.
+  //       const mandatoryItems = menuItems.filter(item =>
+  //         ['home', 'profile'].includes(item.id)
+  //       );
+  //       const finalMenuItems = [...mandatoryItems, ...filteredItems];
+  
+  //       setAccessibleMenuItems(finalMenuItems);
+  //     } catch (error) {
+  //       console.error('Failed to fetch access rights:', error);
+  //     }
+  //   };
+  
+  //   fetchAccessRights();
+  // }, [HRid]);
+  
+
   useEffect(() => {
-    const fetchAccessibleMenus = async () => {
+    const fetchAccessRights = async () => {
       try {
         const response = await apiService.get(`/api/hr_access/${HRid}`);
-        console.log(response);
-        setAccessibleMenuItems(response.data.access);
+        const allowedAccess = response.data.access; // Array of accessible menu item IDs.
+        const filterMenuItems = (items) =>
+          items.filter(item => {
+            if (item.submenu) {
+              item.submenu = filterMenuItems(item.submenu);
+              return allowedAccess.includes(item.id) || item.submenu.length > 0;
+            }
+            return allowedAccess.includes(item.id);
+          });
+        setAccessibleMenuItems(filterMenuItems(menuItems));
       } catch (error) {
-        console.error("Failed to fetch accessible menus:", error);
+        console.error('Failed to fetch access rights:', error);
       }
     };
-    fetchAccessibleMenus();
-  }, []);
 
-
-
-  const getAllMenuIds = (items) => {
-    return items.reduce((acc, item) => {
-      if (item.submenu) {
-        return [...acc, item.id, ...item.submenu.map(sub => sub.id)];
-      }
-      return [...acc, item.id];
-    }, []);
-  };
-
-
-
-    // // Get restricted routes whenever accessibleMenuItems changes
-    // useEffect(() => {
-    //   const allMenuIds = getAllMenuIds(menuItems);
-    //   const restrictedRoutes = allMenuIds.filter(id => !accessibleMenuItems.includes(id));
-      
-    //   // If current route is restricted, redirect to home
-    //   const currentRoute = location.pathname.split('/')[2] || 'home';
-    //   if (restrictedRoutes.includes(currentRoute)) {
-    //     navigate('/HR_dash/home');
-    //   }
-    // }, [accessibleMenuItems, location.pathname]);
-
-    
-
-  // const filteredMenuItems = menuItems.filter(item =>
-  //   accessibleMenuItems.includes(item.id) || 
-  //   (item.submenu && item.submenu.some(subItem => accessibleMenuItems.includes(subItem.id)))
-  // );
+    fetchAccessRights();
+  }, [HRid]);
 
   useEffect(() => {
     const pathParts = location.pathname.split('/');
@@ -173,18 +183,6 @@ const HRDash = () => {
 
   const renderContent = () => {
 
-
-    const currentRoute = location.pathname.split('/')[2] || 'home';
-    const allMenuIds = getAllMenuIds(menuItems);
-    // const restrictedRoutes = allMenuIds.filter(id => !accessibleMenuItems.includes(id));
-
-    // // If route is restricted, redirect to home
-    // if (restrictedRoutes.includes(currentRoute)) {
-    //   navigate('/HR_dash');
-    //   return null;
-    // }
-
-
     if (currentPath.startsWith('job_desc/')) {
       const jobId = currentPath.split('/')[1];
       return <HrJobDesc jobId={jobId} setSelectedView={setSelectedView} />;
@@ -222,7 +220,6 @@ const HRDash = () => {
 
     const statusMapping = {
       "students-qualified": "qualified",
-      "students-not-qualified": "not-qualified",
       "students-placed": "placed",
       "students-not-placed": "not-placed",
       "not-attended": "not-attended",
@@ -269,6 +266,7 @@ const HRDash = () => {
       case 'bulkGuest':
         return <GuestBulkRegister />
 
+
       case 'profile':
         return <ProfilePage />
 
@@ -276,7 +274,7 @@ const HRDash = () => {
         return <JobApplicationsTable />
 
       case "students-qualified":
-      case "students-not-qualified":
+	    case "students-not-qualified":
       case "students-placed":
       case "students-not-placed":
       case "not-attended":
@@ -301,6 +299,9 @@ const HRDash = () => {
         return <JobStatus statusInfo="drive-scheduled" />;
       case "drive-done":
         return <JobStatus statusInfo="drive-done" />;
+        case "offer-received":
+          return <JobStatus statusInfo="offer-received" />;
+        
       case "not-interested":
         return <JobStatus statusInfo="not-interested" />;
       case 'dashboard':
@@ -323,14 +324,14 @@ const HRDash = () => {
         </button>
         <div className='icons-container'>
           <ul>
-            {menuItems.map(renderMenuItem)}
+            {accessibleMenuItems.map(renderMenuItem)}
           </ul>
         </div>
       </nav>
       <div className={`main-content ${isSidebarOpen ? 'expanded' : 'collapsed'}`}>
         <div className="top-panel">
           <div className="pvpk">
-            <Dropdown.Item className="btn bg-transparent logout-btn fw-bold w-100 pt-0" style={{ cursor: "auto" }}>
+            <Dropdown.Item className="btn bg-transparent logout-btn fw-bold w-100 pt-0" style={{cursor:"auto"}}>
               {name}
             </Dropdown.Item>
             <button
